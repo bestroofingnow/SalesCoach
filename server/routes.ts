@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
 import { insertProgressSchema, insertQuizResponseSchema } from "@shared/schema";
+import { generateContextualHint, generateQuizHint, explainConcept } from "./ai-hints";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // For development, create a simple auth middleware that creates a test user
@@ -213,6 +214,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // AI Hints endpoints
+  app.post('/api/ai/hint', devAuth, async (req: any, res) => {
+    try {
+      const { moduleTitle, lessonTitle, lessonContent, userQuestion, previousHints } = req.body;
+      
+      if (!moduleTitle || !lessonTitle || !lessonContent) {
+        return res.status(400).json({ message: "Missing required context" });
+      }
+      
+      const hint = await generateContextualHint({
+        moduleTitle,
+        lessonTitle,
+        lessonContent,
+        userQuestion,
+        previousHints
+      });
+      
+      res.json({ hint });
+    } catch (error) {
+      console.error("Error generating hint:", error);
+      res.status(500).json({ message: "Failed to generate hint" });
+    }
+  });
+
+  app.post('/api/ai/quiz-hint', devAuth, async (req: any, res) => {
+    try {
+      const { question, options, moduleContext } = req.body;
+      
+      if (!question || !options || !moduleContext) {
+        return res.status(400).json({ message: "Missing required quiz context" });
+      }
+      
+      const hint = await generateQuizHint(question, options, moduleContext);
+      res.json({ hint });
+    } catch (error) {
+      console.error("Error generating quiz hint:", error);
+      res.status(500).json({ message: "Failed to generate quiz hint" });
+    }
+  });
+
+  app.post('/api/ai/explain', devAuth, async (req: any, res) => {
+    try {
+      const { concept, moduleContext } = req.body;
+      
+      if (!concept || !moduleContext) {
+        return res.status(400).json({ message: "Missing concept or context" });
+      }
+      
+      const explanation = await explainConcept(concept, moduleContext);
+      res.json({ explanation });
+    } catch (error) {
+      console.error("Error explaining concept:", error);
+      res.status(500).json({ message: "Failed to explain concept" });
     }
   });
 

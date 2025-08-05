@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
 import LessonContent from "@/components/training/lesson-content";
+import AIHints from "@/components/ai-hints";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -124,6 +125,13 @@ export default function TrainingModule() {
               {/* Main Content */}
               <div className="lg:col-span-3">
                 <LessonContent lesson={activeLesson} />
+                
+                {/* AI Hints Component */}
+                <AIHints 
+                  moduleTitle={module?.title || ''}
+                  lessonTitle={activeLesson.title}
+                  lessonContent={activeLesson.content}
+                />
                 
                 {/* Navigation */}
                 <div className="flex items-center justify-between mt-8">
