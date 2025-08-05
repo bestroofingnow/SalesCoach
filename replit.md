@@ -8,6 +8,22 @@ BRN Training Academy is a comprehensive web-based training platform designed for
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (August 5, 2025)
+
+### Fixed Critical Issues
+- Resolved missing storage interface and database methods - created comprehensive IStorage interface with all required methods
+- Fixed authentication system by implementing a development user for testing (id: test-user-123)
+- Created initial training data including 3 tracks, 3 modules, and 3 lessons for testing
+- Fixed TypeScript errors and database query issues
+- Resolved API data structure mismatches between frontend and backend
+
+### Added Navigation Features
+- Made all "Continue Learning" buttons on dashboard functional - they now navigate to track views
+- Created new training track page to view modules within each track
+- Made sidebar track names and module buttons clickable for navigation
+- Added proper routing for /tracks/:trackId path
+- Connected all navigation elements to enable browsing through training content
+
 ## System Architecture
 
 ### Frontend Architecture

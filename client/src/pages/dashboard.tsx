@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useEffect } from "react";
+import { useLocation } from "wouter";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
 import ProgressCard from "@/components/training/progress-card";
@@ -25,6 +26,7 @@ interface DashboardStats {
 export default function Dashboard() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
@@ -144,7 +146,10 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                  <Button 
+                    className="w-full bg-blue-500 hover:bg-blue-600"
+                    onClick={() => setLocation("/tracks/19f30d96-6d6e-4126-b116-17a387991081")}
+                  >
                     Continue Learning
                   </Button>
                 </CardContent>
@@ -183,7 +188,10 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <Button className="w-full bg-orange-500 hover:bg-orange-600">
+                  <Button 
+                    className="w-full bg-orange-500 hover:bg-orange-600"
+                    onClick={() => setLocation("/tracks/dd1389e4-df7c-4475-8bc2-872c2609bf7e")}
+                  >
                     Continue Learning
                   </Button>
                 </CardContent>
@@ -222,7 +230,10 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <Button className="w-full bg-purple-500 hover:bg-purple-600">
+                  <Button 
+                    className="w-full bg-purple-500 hover:bg-purple-600"
+                    onClick={() => setLocation("/tracks/9329d6b1-0f45-46b1-a42d-60b5068c985b")}
+                  >
                     Continue Learning
                   </Button>
                 </CardContent>

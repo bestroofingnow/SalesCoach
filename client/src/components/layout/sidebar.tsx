@@ -69,7 +69,10 @@ export default function Sidebar() {
             
             return (
               <div key={track.id} className="py-2">
-                <div className="flex items-center justify-between px-4 py-2 text-gray-600">
+                <div 
+                  className="flex items-center justify-between px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer"
+                  onClick={() => window.location.href = `/tracks/${track.id}`}
+                >
                   <div className="flex items-center space-x-3">
                     <i className={`${track.icon} w-5 ${track.color === 'blue' ? 'text-blue-500' : 
                       track.color === 'orange' ? 'text-orange-500' : 'text-purple-500'}`}></i>
@@ -94,6 +97,7 @@ export default function Sidebar() {
                       key={module.id}
                       variant="ghost"
                       className="w-full justify-start text-sm text-gray-600 hover:bg-gray-50 rounded-lg py-2 px-4"
+                      onClick={() => window.location.href = `/module/${module.id}`}
                     >
                       <i className={`fas fa-circle text-xs mr-2 ${
                         module.completed ? 'text-green-500' : 'text-gray-300'

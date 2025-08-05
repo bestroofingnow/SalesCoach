@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
+import TrainingTrack from "@/pages/training-track";
 import TrainingModule from "@/pages/training-module";
 import Quiz from "@/pages/quiz";
 
@@ -20,6 +21,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/tracks/:trackId" component={TrainingTrack} />
           <Route path="/module/:moduleId" component={TrainingModule} />
           <Route path="/lesson/:lessonId" component={TrainingModule} />
           <Route path="/quiz/:type/:id" component={Quiz} />
