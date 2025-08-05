@@ -1,7 +1,18 @@
 import OpenAI from 'openai';
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable is required for AI features');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 export interface HintContext {
   moduleTitle: string;
@@ -36,7 +47,8 @@ Please provide a helpful, encouraging hint that:
 
 Respond with just the hint text, no additional formatting.`;
 
-    const response = await openai.chat.completions.create({
+    const client = getOpenAIClient();
+    const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a supportive roofing training assistant who provides helpful hints." },
@@ -70,7 +82,8 @@ Provide a helpful hint that:
 
 Just provide the hint text.`;
 
-    const response = await openai.chat.completions.create({
+    const client = getOpenAIClient();
+    const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a supportive quiz assistant." },
@@ -101,7 +114,8 @@ Provide an explanation that:
 
 Just provide the explanation.`;
 
-    const response = await openai.chat.completions.create({
+    const client = getOpenAIClient();
+    const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a roofing education expert who explains concepts simply." },
