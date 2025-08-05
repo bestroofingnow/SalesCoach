@@ -110,17 +110,29 @@ export default function Sidebar() {
             );
           })}
           
-          <Button variant="ghost" className="w-full justify-start text-gray-600 hover:bg-gray-50">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-gray-600 hover:bg-gray-50"
+            onClick={() => window.location.href = `/module/gen-company-culture`}
+          >
             <i className="fas fa-star w-5 mr-3"></i>
             <span className="font-medium">Company Culture</span>
           </Button>
           
-          <Button variant="ghost" className="w-full justify-start text-gray-600 hover:bg-gray-50">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-gray-600 hover:bg-gray-50"
+            onClick={() => window.location.href = `/module/gen-certifications`}
+          >
             <i className="fas fa-certificate w-5 mr-3"></i>
             <span className="font-medium">Certifications</span>
           </Button>
           
-          <Button variant="ghost" className="w-full justify-start text-gray-600 hover:bg-gray-50">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-gray-600 hover:bg-gray-50"
+            onClick={() => window.location.href = `/module/gen-doc-library`}
+          >
             <i className="fas fa-folder w-5 mr-3"></i>
             <span className="font-medium">Document Library</span>
           </Button>
