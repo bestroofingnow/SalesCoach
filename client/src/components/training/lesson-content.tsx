@@ -69,7 +69,7 @@ export default function LessonContent({ lesson }: LessonContentProps) {
       <Card>
         <CardContent className="p-8">
           <div 
-            className="prose prose-lg max-w-none"
+            className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg [&_.bg-blue-50]:bg-blue-50 [&_.bg-blue-50]:p-6 [&_.bg-blue-50]:rounded-lg [&_.bg-blue-50]:mb-6 [&_.bg-green-50]:bg-green-50 [&_.bg-green-50]:p-6 [&_.bg-green-50]:rounded-lg [&_.bg-green-50]:mb-6 [&_.bg-orange-50]:bg-orange-50 [&_.bg-orange-50]:p-6 [&_.bg-orange-50]:rounded-lg [&_.bg-orange-50]:mb-6 [&_.bg-purple-50]:bg-purple-50 [&_.bg-purple-50]:p-6 [&_.bg-purple-50]:rounded-lg [&_.bg-purple-50]:mb-6 [&_.bg-yellow-50]:bg-yellow-50 [&_.bg-yellow-50]:p-6 [&_.bg-yellow-50]:rounded-lg [&_.bg-yellow-50]:mb-6 [&_.bg-red-50]:bg-red-50 [&_.bg-red-50]:p-6 [&_.bg-red-50]:rounded-lg [&_.bg-red-50]:mb-6 [&_.bg-gray-50]:bg-gray-50 [&_.bg-gray-50]:p-6 [&_.bg-gray-50]:rounded-lg [&_.bg-gray-50]:mb-6 [&_.bg-white]:bg-white [&_.bg-white]:p-4 [&_.bg-white]:rounded [&_.bg-white]:shadow-sm [&_.grid]:grid [&_.grid]:gap-6 [&_.grid]:mb-6"
             dangerouslySetInnerHTML={{ __html: lesson.content }}
           />
         </CardContent>

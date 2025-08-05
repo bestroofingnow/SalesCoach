@@ -1,0 +1,1256 @@
+import React, { useState, useEffect } from 'react';
+import { ChevronRight, ChevronLeft, Home, Book, Users, Wrench, FileText, DollarSign, Target, Award, CheckCircle, Play, Star, Menu, X, Calendar, Phone, MapPin, Clock, TrendingUp } from 'lucide-react';
+
+const TrainingApp = () => {
+  const [currentModule, setCurrentModule] = useState('dashboard');
+  const [currentLesson, setCurrentLesson] = useState(0);
+  const [completedLessons, setCompletedLessons] = useState(new Set());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const modules = {
+    dashboard: {
+      title: 'Dashboard',
+      icon: Home,
+      color: 'bg-blue-500',
+      lessons: []
+    },
+    company: {
+      title: 'Company Culture',
+      icon: Star,
+      color: 'bg-purple-500',
+      lessons: [
+        {
+          title: 'Our Story & Values Deep Dive',
+          content: `
+            <h2>Welcome to the Best Roofing Now Family!</h2>
+            <p>Understanding our company culture isn't just about memorizing values - it's about living them every day and sharing that passion with customers.</p>
+            
+            <h3>Our Origin Story (Use This in Presentations)</h3>
+            <div class="story-section">
+              <p><strong>The Script:</strong> "Best Roofing Now was founded in 2021 by Fred and James Turner, a father-son team right here in Charlotte. We're not some big national company - we're your neighbors who decided to do roofing the right way."</p>
+              
+              <p><strong>Why This Matters:</strong> Local connection builds immediate trust. People prefer supporting local businesses.</p>
+              
+              <p><strong>Follow-up Questions to Ask:</strong></p>
+              <ul>
+                <li>"How long have you lived in Charlotte?"</li>
+                <li>"Do you prefer working with local companies?"</li>
+                <li>"Have you heard of us from any neighbors?"</li>
+              </ul>
+            </div>
+            
+            <h3>Our 6 Core Values - Memory System: "I-L-W-S-C-C"</h3>
+            
+            <div class="value-deep-dive">
+              <h4>🤝 INTEGRITY with TRANSPARENCY</h4>
+              <p><strong>What it means:</strong> We never hide anything from customers. If we see it, you see it.</p>
+              
+              <p><strong>How to demonstrate:</strong></p>
+              <ul>
+                <li>Show drone footage in real-time during inspection</li>
+                <li>Point out areas that DON'T need work</li>
+                <li>Explain exactly what we found and why it matters</li>
+                <li>Never exaggerate damage</li>
+              </ul>
+              
+              <p><strong>Customer script:</strong> "I'm going to show you exactly what I'm seeing up there. I'll point out both the good and the areas that need attention. I believe you deserve complete honesty about your roof's condition."</p>
+            </div>
+            
+            <div class="value-deep-dive">
+              <h4>❤️ LOVE of COMMUNITY</h4>
+              <p><strong>What it means:</strong> Charlotte isn't just where we work - it's our home. We care about our neighbors.</p>
+              
+              <p><strong>How to demonstrate:</strong></p>
+              <ul>
+                <li>Mention other neighborhoods you've worked in</li>
+                <li>Share stories of helping neighbors</li>
+                <li>Offer to check neighbors' roofs too</li>
+                <li>Get involved in community events</li>
+              </ul>
+              
+              <p><strong>Customer script:</strong> "We've been helping Charlotte homeowners for years. Just last month, we replaced three roofs on this very street. Mrs. Johnson two houses down? We helped her navigate her insurance claim."</p>
+            </div>
+            
+            <div class="value-deep-dive">
+              <h4>💪 WORK HARD to PLAY HARD</h4>
+              <p><strong>What it means:</strong> We're serious about quality work, but we also know how to have fun and celebrate success.</p>
+              
+              <p><strong>Customer script:</strong> "We take our work seriously, but we also love what we do. There's nothing better than seeing a homeowner's face when they see their beautiful new roof!"</p>
+            </div>
+            
+            <div class="value-deep-dive">
+              <h4>🎓 SHARING KNOWLEDGE</h4>
+              <p><strong>What it means:</strong> We educate customers so they can make informed decisions, even if they don't choose us.</p>
+              
+              <p><strong>Customer script:</strong> "Let me teach you what to look for when evaluating roofing companies. Even if you don't choose us, you'll know what questions to ask."</p>
+            </div>
+            
+            <div class="value-deep-dive">
+              <h4>⭐ COMMITMENT to EXCELLENCE</h4>
+              <p><strong>What it means:</strong> Good enough isn't good enough. We aim for perfection every time.</p>
+              
+              <p><strong>Customer script:</strong> "Excellence isn't negotiable for us. We check our work multiple times, and we don't consider a job done until you're completely satisfied."</p>
+            </div>
+            
+            <div class="value-deep-dive">
+              <h4>✨ CRAFTING MAGICAL MOMENTS</h4>
+              <p><strong>What it means:</strong> We create experiences so positive that customers become raving fans.</p>
+              
+              <p><strong>Examples of magical moments:</strong></p>
+              <ul>
+                <li>Cleaning their gutters without being asked</li>
+                <li>Remembering their dog's name</li>
+                <li>Following up during the first big storm</li>
+                <li>Sending anniversary cards</li>
+              </ul>
+            </div>
+          `
+        },
+        {
+          title: 'What Makes BRN Different',
+          content: `
+            <h2>Your Competitive Arsenal</h2>
+            <p>Every competitor claims to be "the best." Here's why we actually ARE different, and how to prove it.</p>
+            
+            <div class="competitive-advantage">
+              <h3>🚁 Drone Technology Advantage</h3>
+              
+              <h4>Customer Benefits Script:</h4>
+              <p>"Our drone inspection is like having X-ray vision for your roof. We can see every single shingle, every piece of flashing, every potential problem area. Most contractors miss 30-40% of damage because they can't see it from the ground."</p>
+              
+              <h4>Proof Points:</h4>
+              <ul>
+                <li>Show side-by-side photos: ground view vs. drone view</li>
+                <li>Demonstrate the drone live if weather permits</li>
+                <li>Mention insurance companies prefer drone documentation</li>
+                <li>Safety benefit: no one walking on their roof</li>
+              </ul>
+            </div>
+            
+            <div class="competitive-advantage">
+              <h3>🛡️ 50-Year Full Warranty</h3>
+              
+              <h4>Customer Script:</h4>
+              <p>"Our 50-year full warranty covers both our workmanship AND the manufacturer's materials. That means if anything goes wrong with our work or these materials for 50 years, we fix it at no cost to you. Most contractors only warranty their work for 1-2 years."</p>
+              
+              <h4>What Our 50-Year Full Warranty Covers:</h4>
+              <ul>
+                <li><strong>Workmanship:</strong> Our installation and labor for 50 years</li>
+                <li><strong>Materials:</strong> Full CertainTeed manufacturer coverage for 50 years</li>
+                <li><strong>Wind Damage:</strong> Up to 130 mph depending on shingle</li>
+                <li><strong>Algae Growth:</strong> StreakFighter algae resistance</li>
+                <li><strong>Manufacturing Defects:</strong> Complete material replacement</li>
+              </ul>
+              
+              <h4>Competitive Advantage Script:</h4>
+              <p>"When you compare contractors, ask them about their warranty. Most will say 'we warranty our work for a year, and the manufacturer warranties the materials.' We're different - we stand behind EVERYTHING for 50 full years. That's confidence in our quality."</p>
+            </div>
+            
+            <div class="competitive-advantage">
+              <h3>🕐 24/7 Emergency Service</h3>
+              
+              <h4>Customer Script:</h4>
+              <p>"When a storm hits at 2 AM on Sunday, you don't want to leave voicemails. You want someone who answers the phone and can be at your house with a tarp in two hours. That's what 24/7 service really means."</p>
+              
+              <h4>What This Really Means:</h4>
+              <ul>
+                <li>Emergency tarping within 2 hours</li>
+                <li>Real person answers the phone, not voicemail</li>
+                <li>Available weekends and holidays</li>
+                <li>Storm response team mobilized within hours</li>
+              </ul>
+            </div>
+          `
+        },
+        {
+          title: 'The 50-Year Warranty Advantage',
+          content: `
+            <h2>Your Most Powerful Competitive Weapon</h2>
+            <p>Your 50-year full warranty isn't just a feature - it's proof of confidence, quality, and commitment that no competitor can match.</p>
+            
+            <h3>Understanding the BRN 50-Year Full Warranty</h3>
+            
+            <div class="warranty-breakdown">
+              <h4>📋 What "Full Warranty" Means</h4>
+              <p><strong>Complete Coverage:</strong> Both workmanship AND materials are covered for the full 50 years.</p>
+              
+              <p><strong>The Difference:</strong></p>
+              <ul>
+                <li><strong>Typical Contractor:</strong> "We warranty our work for 1 year, manufacturer warranties materials for 25-30 years"</li>
+                <li><strong>Best Roofing Now:</strong> "We warranty EVERYTHING - our work AND the materials - for 50 full years"</li>
+              </ul>
+              
+              <p><strong>Customer Education Script:</strong></p>
+              <p>"Most roofing companies will tell you they warranty their work for a year or two, and then you're on your own except for manufacturer defects. We're different. For 50 years, if ANYTHING goes wrong - whether it's our installation or the materials - we fix it at no cost to you."</p>
+            </div>
+            
+            <h3>How to Position the 50-Year Warranty</h3>
+            
+            <div class="positioning-strategy">
+              <h4>🎯 Early in the Conversation</h4>
+              <p><strong>When to mention:</strong> Right after showing damage or explaining the need for replacement.</p>
+              
+              <p><strong>Script:</strong> "Before we talk about anything else, I want you to know that everything we do comes with our 50-year full warranty. That means you'll never have to worry about this roof again - not just for a few years, but for five decades."</p>
+            </div>
+            
+            <div class="positioning-strategy">
+              <h4>💪 Against Competition</h4>
+              <p><strong>When customer mentions other quotes:</strong></p>
+              
+              <p><strong>Script:</strong> "That's smart to get multiple quotes. When you compare them, ask each contractor this question: 'If something goes wrong with your work in 10 years, who pays to fix it?' Most will give you a complicated answer about manufacturer warranties and limited coverage. We'll say 'We do, and we'll fix it for free.'"</p>
+            </div>
+            
+            <div class="positioning-strategy">
+              <h4>🛡️ Handling Price Objections</h4>
+              <p><strong>When price becomes an issue:</strong></p>
+              
+              <p><strong>Script:</strong> "I understand you're looking at the upfront cost, but let's talk about the total cost of ownership. With our 50-year warranty, this is the last roof you'll ever buy. Other contractors might be cheaper today, but what happens when you need repairs in 5, 10, or 15 years? Those costs add up fast."</p>
+            </div>
+            
+            <h3>Warranty Objection Handling</h3>
+            
+            <div class="warranty-objection">
+              <h4>"What if your company goes out of business?"</h4>
+              <p><strong>Response:</strong> "Great question - it shows you're thinking long-term, which is smart. Here's what protects you: First, we're bonded and insured, which provides legal protection. Second, we've been growing every year since 2021 - we're not going anywhere. Third, the materials portion is backed by CertainTeed, one of the largest manufacturers in North America. But most importantly, we stand behind our work because we plan to be here serving Charlotte families for the next 50 years."</p>
+            </div>
+            
+            <div class="warranty-objection">
+              <h4>"That sounds too good to be true"</h4>
+              <p><strong>Response:</strong> "I understand why you'd think that - most contractors can't make this promise because they don't have confidence in their work. We can offer this warranty because we use premium materials, hire skilled craftsmen, and follow strict quality standards. When you do everything right the first time, standing behind it for 50 years isn't risky - it's smart business."</p>
+            </div>
+            
+            <div class="warranty-objection">
+              <h4>"I'll probably sell the house before then"</h4>
+              <p><strong>Response:</strong> "Actually, that makes our warranty even more valuable! A 50-year warranty is a huge selling point for potential buyers. Real estate agents tell us that homes with our warranty sell faster and often for more money. You're not just protecting your investment - you're increasing it."</p>
+            </div>
+          `
+        }
+      ]
+    },
+    canvassing: {
+      title: 'Canvassing Mastery',
+      icon: Users,
+      color: 'bg-green-500',
+      lessons: [
+        {
+          title: 'Door-to-Door Psychology',
+          content: `
+            <h2>The Science of First Impressions at the Front Door</h2>
+            <p>Canvassing isn't just knocking on doors - it's applied psychology. Understanding human behavior gives you a massive advantage.</p>
+            
+            <h3>The 7-Second Rule</h3>
+            <p>Research shows people make judgments about you in just 7 seconds. Here's how to make them count:</p>
+            
+            <div class="psychology-principle">
+              <h4>🎭 The Halo Effect</h4>
+              <p><strong>What it is:</strong> If customers like your first impression, they'll assume everything else about you is good too.</p>
+              
+              <p><strong>How to trigger it:</strong></p>
+              <ul>
+                <li><strong>Dress:</strong> Clean BRN polo, khakis, clean shoes</li>
+                <li><strong>Posture:</strong> Stand tall, shoulders back, confident but not cocky</li>
+                <li><strong>Facial expression:</strong> Genuine smile, eye contact</li>
+                <li><strong>Voice:</strong> Clear, warm, slightly slower than normal</li>
+              </ul>
+            </div>
+            
+            <div class="psychology-principle">
+              <h4>🧠 Reciprocity Principle</h4>
+              <p><strong>What it is:</strong> When you give someone something first, they feel obligated to give back.</p>
+              
+              <p><strong>How to use it:</strong></p>
+              <ul>
+                <li>Offer free information about their roof</li>
+                <li>Point out positive things about their property</li>
+                <li>Share helpful tips even if they don't buy</li>
+                <li>Offer to check their neighbors' roofs too</li>
+              </ul>
+            </div>
+            
+            <h3>Reading Homeowner Body Language</h3>
+            
+            <div class="body-language-guide">
+              <h4>🟢 Positive Signals (Keep Going)</h4>
+              <ul>
+                <li><strong>Open posture:</strong> Arms uncrossed, facing you</li>
+                <li><strong>Eye contact:</strong> Looking at you, not looking away</li>
+                <li><strong>Leaning in:</strong> Showing interest</li>
+                <li><strong>Questions:</strong> Asking about your services</li>
+              </ul>
+            </div>
+            
+            <div class="body-language-guide">
+              <h4>🔴 Negative Signals (Pivot or Exit)</h4>
+              <ul>
+                <li><strong>Backing away:</strong> Creating physical distance</li>
+                <li><strong>Looking at phone:</strong> Showing disinterest</li>
+                <li><strong>One-word answers:</strong> "No," "Busy," "Fine"</li>
+                <li><strong>Door positioning:</strong> Blocking entry</li>
+              </ul>
+            </div>
+          `
+        },
+        {
+          title: 'Perfect Opening Scripts',
+          content: `
+            <h2>Your Opening Script Toolkit</h2>
+            <p>The first 30 seconds determine whether you get 5 minutes or get the door slammed. Here are proven opening scripts for every situation.</p>
+            
+            <h3>The Universal BRN Opening</h3>
+            
+            <div class="script-breakdown">
+              <h4>The Complete Script:</h4>
+              <div class="script-text">
+                <p><strong>"Good [morning/afternoon]! I hope I'm not catching you at a bad time."</strong></p>
+                <p class="script-note">[Pause - wait for response. This shows respect.]</p>
+                
+                <p><strong>"I'm [Your Name] from Best Roofing Now. We're a local Charlotte family business, and I was just helping your neighbor [specific address] with their roof after the recent storm."</strong></p>
+                <p class="script-note">[Establishes credibility and local connection]</p>
+                
+                <p><strong>"While I was there, I noticed from the street that your roof might have some areas that could use a quick inspection. Would that be helpful for you?"</strong></p>
+                <p class="script-note">[Asks for permission, not demanding entry]</p>
+              </div>
+              
+              <h4>Why This Works:</h4>
+              <ul>
+                <li>✅ Polite opening builds rapport</li>
+                <li>✅ Local reference builds trust</li>
+                <li>✅ Neighbor mention provides social proof</li>
+                <li>✅ Free inspection removes sales pressure</li>
+              </ul>
+            </div>
+            
+            <h3>Situation-Specific Variations</h3>
+            
+            <div class="script-variation">
+              <h4>🌩️ Post-Storm Canvassing</h4>
+              <div class="script-text">
+                <p><strong>"Hi! I'm [Name] from Best Roofing Now. I hope everyone's okay after last night's storm."</strong></p>
+                
+                <p><strong>"I'm going through the neighborhood checking on folks and offering free damage assessments. Would you like me to take a look with our drone? No charge, and you'll have photos to document everything."</strong></p>
+              </div>
+            </div>
+            
+            <div class="script-variation">
+              <h4>🏠 No Visible Damage Approach</h4>
+              <div class="script-text">
+                <p><strong>"Good morning! Your roof actually looks pretty good from down here, but I've learned that the worst damage is often invisible from the ground."</strong></p>
+                
+                <p><strong>"Would you mind if I took a quick look? If there's no damage, I'll tell you that too. At least you'll know for sure."</strong></p>
+              </div>
+            </div>
+          `
+        }
+      ]
+    },
+    products: {
+      title: 'Products & Materials',
+      icon: Wrench,
+      color: 'bg-orange-500',
+      lessons: [
+        {
+          title: 'CertainTeed Shingle Mastery',
+          content: `
+            <h2>CertainTeed: Your Competitive Advantage</h2>
+            <p>CertainTeed isn't just any shingle manufacturer - they're North America's largest and most trusted roofing company with 119 years of proven performance.</p>
+            
+            <h3>Our Main CertainTeed Lines</h3>
+            
+            <div class="product-card">
+              <h4>🏆 Landmark Series (Most Popular)</h4>
+              <ul>
+                <li><strong>BRN Warranty:</strong> 50 Years Full Coverage</li>
+                <li><strong>Wind Rating:</strong> 110 mph</li>
+                <li><strong>Best For:</strong> Most homes - great value</li>
+                <li><strong>Colors:</strong> 22 options</li>
+              </ul>
+              <p><strong>Customer Script:</strong> "Landmark shingles are our most popular choice because they give you premium performance at a great value. With our 50-year full warranty, these can handle 110 mph winds, and resist hail damage better than most competitors' premium lines."</p>
+            </div>
+            
+            <div class="product-card">
+              <h4>👑 Presidential Series (Premium)</h4>
+              <ul>
+                <li><strong>BRN Warranty:</strong> 50 Years Full Coverage</li>
+                <li><strong>Wind Rating:</strong> 130 mph</li>
+                <li><strong>Impact Rating:</strong> Class 4 (Highest Available)</li>
+                <li><strong>Special Feature:</strong> Thick, dimensional look</li>
+              </ul>
+              <p><strong>Customer Script:</strong> "Presidential shingles are for homeowners who want the ultimate in performance and beauty. They look like expensive cedar shakes but will outlast them by decades, all backed by our 50-year full warranty."</p>
+            </div>
+            
+            <div class="product-card">
+              <h4>💰 XT Series (Budget-Friendly)</h4>
+              <ul>
+                <li><strong>Manufacturer Warranty:</strong> 25-30 years</li>
+                <li><strong>BRN Workmanship:</strong> 50 years</li>
+                <li><strong>Wind Rating:</strong> 90-110 mph</li>
+                <li><strong>Best For:</strong> Budget-conscious customers</li>
+              </ul>
+              <p><strong>Customer Script:</strong> "XT shingles give you CertainTeed quality at a budget-friendly price. Even with our entry-level shingles, you still get our 50-year workmanship warranty."</p>
+            </div>
+            
+            <h3>Key Features to Always Mention</h3>
+            <ul>
+              <li>✅ <strong>Algae Resistance:</strong> Keeps roof looking new longer</li>
+              <li>✅ <strong>Class A Fire Rating:</strong> Safest rating possible</li>
+              <li>✅ <strong>Made in USA:</strong> Supporting American jobs</li>
+              <li>✅ <strong>MAX Adhesion:</strong> Superior wind resistance</li>
+            </ul>
+          `
+        },
+        {
+          title: 'Complete Roofing System',
+          content: `
+            <h2>Beyond Shingles: The Complete System</h2>
+            <p>A roof is like a symphony orchestra - every component must work together perfectly. Understanding each piece helps you sell complete solutions.</p>
+            
+            <div class="component-section">
+              <h3>🛡️ Shingles (The Soldier)</h3>
+              <p>The first line of defense against weather. They shed water and block UV rays.</p>
+              <p><strong>Customer Benefit:</strong> "These are what people see, and they protect everything underneath."</p>
+            </div>
+            
+            <div class="component-section">
+              <h3>💧 Underlayment (The Backup)</h3>
+              <p>A waterproof barrier under the shingles. Like a raincoat for your roof deck.</p>
+              
+              <p><strong>Types:</strong></p>
+              <ul>
+                <li><strong>Felt:</strong> Traditional, budget-friendly</li>
+                <li><strong>Synthetic:</strong> Stronger, lasts longer, won't tear</li>
+              </ul>
+              
+              <p><strong>Customer Benefit:</strong> "If water gets past the shingles, this stops it from damaging your home."</p>
+            </div>
+            
+            <div class="component-section">
+              <h3>🧊 Ice & Water Shield (The Guardian)</h3>
+              <p>Extra protection in areas where ice and water can build up.</p>
+              
+              <p><strong>Where We Install:</strong></p>
+              <ul>
+                <li>Eaves (bottom edge of roof)</li>
+                <li>Valleys (where roof sections meet)</li>
+                <li>Around chimneys and skylights</li>
+              </ul>
+              
+              <p><strong>Customer Benefit:</strong> "This prevents ice dams from causing expensive water damage inside your home."</p>
+            </div>
+            
+            <div class="component-section">
+              <h3>💨 Starter Strips (The Foundation)</h3>
+              <p>Special shingles along the edge that help the first row seal properly.</p>
+              <p><strong>Customer Benefit:</strong> "These make sure your roof edges are completely sealed against wind-driven rain."</p>
+            </div>
+            
+            <div class="component-section">
+              <h3>🌊 Drip Edge (The Director)</h3>
+              <p>Metal strips that direct water away from the roof edge into gutters.</p>
+              <p><strong>Customer Benefit:</strong> "This protects your fascia boards from water damage and helps gutters work better."</p>
+            </div>
+          `
+        }
+      ]
+    },
+    insurance: {
+      title: 'Insurance Claims',
+      icon: FileText,
+      color: 'bg-red-500',
+      lessons: [
+        {
+          title: 'Insurance Process Overview',
+          content: `
+            <h2>Insurance Claims Made Simple</h2>
+            <p>Insurance claims can seem scary, but they're actually just a way for insurance companies to help homeowners fix storm damage.</p>
+            
+            <h3>The BRN Insurance Process (8 Steps)</h3>
+            
+            <div class="process-step">
+              <h4>Step 1: Inspection & Explanation</h4>
+              <p>✅ Show customer the damage</p>
+              <p>✅ Explain how insurance works</p>
+              <p>✅ Get their policy number</p>
+            </div>
+            
+            <div class="process-step">
+              <h4>Step 2: File the Claim</h4>
+              <p>✅ Help customer call insurance</p>
+              <p>✅ Get claim number and adjuster info</p>
+              <p>✅ Add everything to RoofLink</p>
+            </div>
+            
+            <div class="process-step">
+              <h4>Step 3: Service Agreement</h4>
+              <p>✅ Explain our service agreement</p>
+              <p>✅ Get it signed</p>
+              <p>✅ Scan into CompanyCam</p>
+            </div>
+            
+            <div class="process-step">
+              <h4>Step 4: Meet the Adjuster</h4>
+              <p>✅ Be there when adjuster inspects</p>
+              <p>✅ Point out all damage</p>
+              <p>✅ Take photos in CompanyCam</p>
+            </div>
+            
+            <div class="process-step">
+              <h4>Step 5: Review the Estimate</h4>
+              <p>✅ Check insurance estimate carefully</p>
+              <p>✅ Look for missed items</p>
+              <p>✅ Prepare supplement if needed</p>
+            </div>
+            
+            <div class="process-step">
+              <h4>Step 6: Collect Payment</h4>
+              <p>✅ Get ACV check from customer</p>
+              <p>✅ Sign purchase agreement</p>
+              <p>✅ Schedule the work</p>
+            </div>
+            
+            <div class="process-step">
+              <h4>Step 7: Complete Work</h4>
+              <p>✅ Install the roof</p>
+              <p>✅ Document everything</p>
+              <p>✅ Get final inspection</p>
+            </div>
+            
+            <div class="process-step">
+              <h4>Step 8: Final Payment</h4>
+              <p>✅ Submit completion docs</p>
+              <p>✅ Collect depreciation payment</p>
+              <p>✅ Close the job</p>
+            </div>
+          `
+        },
+        {
+          title: 'Reading Insurance Estimates',
+          content: `
+            <h2>How to Read an Insurance Estimate</h2>
+            <p>An insurance estimate is like a recipe - it lists all the ingredients (materials) and steps (labor) needed to fix the roof.</p>
+            
+            <h3>Key Sections to Check</h3>
+            
+            <div class="estimate-section">
+              <h4>📋 Header Information</h4>
+              <p><strong>Look For:</strong></p>
+              <ul>
+                <li>Claim number</li>
+                <li>Policy number</li>
+                <li>Date of loss (storm date)</li>
+                <li>Adjuster name and contact</li>
+              </ul>
+            </div>
+            
+            <div class="estimate-section">
+              <h4>📝 Line Items (The Important Stuff)</h4>
+              <p><strong>Always Check For:</strong></p>
+              <ul>
+                <li>✅ <strong>Shingles:</strong> Right type and quantity?</li>
+                <li>✅ <strong>Underlayment:</strong> Synthetic or felt?</li>
+                <li>✅ <strong>Ice & Water:</strong> Enough coverage?</li>
+                <li>✅ <strong>Starter Strip:</strong> Around all edges?</li>
+                <li>✅ <strong>Drip Edge:</strong> Often missed!</li>
+                <li>✅ <strong>Ridge Cap:</strong> Peak coverage</li>
+                <li>✅ <strong>Vents:</strong> Roof and soffit</li>
+              </ul>
+            </div>
+            
+            <div class="estimate-section">
+              <h4>💰 Pricing Information</h4>
+              <p><strong>Three Key Numbers:</strong></p>
+              <ul>
+                <li><strong>RCV:</strong> Replacement Cost Value (full amount)</li>
+                <li><strong>ACV:</strong> Actual Cash Value (what you get first)</li>
+                <li><strong>Deductible:</strong> What customer pays</li>
+              </ul>
+              <p><strong>Simple Math:</strong> RCV - Deductible = What insurance pays total</p>
+            </div>
+            
+            <h3>Common Missing Items</h3>
+            <ul>
+              <li>🔍 <strong>Drip Edge:</strong> Often "forgotten" by adjusters</li>
+              <li>🔍 <strong>Gutters:</strong> Check for hail damage</li>
+              <li>🔍 <strong>Siding:</strong> Hail hits more than just roofs</li>
+              <li>🔍 <strong>Overhead & Profit:</strong> For jobs over $20K</li>
+            </ul>
+          `
+        }
+      ]
+    },
+    retail: {
+      title: 'Retail Sales Mastery',
+      icon: DollarSign,
+      color: 'bg-yellow-500',
+      lessons: [
+        {
+          title: 'Retail vs Insurance: The Fundamental Differences',
+          content: `
+            <h2>Retail Sales: When Customers Pay Directly</h2>
+            <p>Retail sales are when customers pay for their roof out of their own pocket, not through insurance. This completely changes your approach, messaging, and closing strategy.</p>
+            
+            <h3>The Retail Mindset Shift</h3>
+            
+            <div class="mindset-comparison">
+              <h4>🏦 Insurance Sales Mindset</h4>
+              <ul>
+                <li><strong>Customer thinking:</strong> "Insurance should pay for this"</li>
+                <li><strong>Your role:</strong> Damage advocate</li>
+                <li><strong>Urgency:</strong> Storm damage timing</li>
+                <li><strong>Price focus:</strong> Deductible only</li>
+                <li><strong>Decision speed:</strong> Often faster (necessity-driven)</li>
+              </ul>
+            </div>
+            
+            <div class="mindset-comparison">
+              <h4>🛒 Retail Sales Mindset</h4>
+              <ul>
+                <li><strong>Customer thinking:</strong> "Is this worth my money?"</li>
+                <li><strong>Your role:</strong> Investment advisor</li>
+                <li><strong>Urgency:</strong> Value and timing you create</li>
+                <li><strong>Price focus:</strong> Full investment amount</li>
+                <li><strong>Decision speed:</strong> Usually slower (want-driven)</li>
+              </ul>
+            </div>
+            
+            <h3>Why Customers Buy Retail Roofs</h3>
+            
+            <div class="retail-motivation">
+              <h4>🏠 Home Improvement & Curb Appeal</h4>
+              <p><strong>Customer Mindset:</strong> "I want my home to look amazing"</p>
+              <p><strong>Your Angle:</strong> "This will make your home the most beautiful on the block and increase its value significantly."</p>
+              <p><strong>Key Points to Hit:</strong></p>
+              <ul>
+                <li>Before/after photos of similar homes</li>
+                <li>Color options and aesthetic impact</li>
+                <li>Neighborhood comparison ("Be the house everyone notices")</li>
+                <li>Resale value increase</li>
+              </ul>
+            </div>
+            
+            <div class="retail-motivation">
+              <h4>⏰ Preventive Maintenance</h4>
+              <p><strong>Customer Mindset:</strong> "I want to replace it before problems start"</p>
+              <p><strong>Your Angle:</strong> "You're being smart by investing now instead of waiting for expensive emergency repairs."</p>
+              <p><strong>Key Points to Hit:</strong></p>
+              <ul>
+                <li>Cost of emergency repairs vs planned replacement</li>
+                <li>Peace of mind and warranty protection</li>
+                <li>Energy efficiency improvements</li>
+                <li>Avoiding interior damage from leaks</li>
+              </ul>
+            </div>
+            
+            <div class="retail-motivation">
+              <h4>💰 Home Sale Preparation</h4>
+              <p><strong>Customer Mindset:</strong> "I need this to sell my house"</p>
+              <p><strong>Your Angle:</strong> "A new roof will help your house sell faster, for more money, and with fewer complications."</p>
+              <p><strong>Key Points to Hit:</strong></p>
+              <ul>
+                <li>Home inspection issues eliminated</li>
+                <li>Buyer confidence and financing approval</li>
+                <li>Return on investment statistics</li>
+                <li>50-year warranty as selling point</li>
+              </ul>
+            </div>
+            
+            <div class="retail-motivation">
+              <h4>🔧 Tired of Constant Repairs</h4>
+              <p><strong>Customer Mindset:</strong> "I'm tired of throwing money at patch jobs"</p>
+              <p><strong>Your Angle:</strong> "Stop throwing good money after bad - invest in a permanent solution."</p>
+              <p><strong>Key Points to Hit:</strong></p>
+              <ul>
+                <li>Calculate money already spent on repairs</li>
+                <li>Project future repair costs</li>
+                <li>Total cost of ownership comparison</li>
+                <li>End the cycle of worry and maintenance</li>
+              </ul>
+            </div>
+            
+            <h3>Your Retail Commission Structure</h3>
+            
+            <div class="commission-breakdown">
+              <h4>💰 How You Get Paid on Retail Jobs</h4>
+              
+              <p><strong>Profit-Sharing Structure:</strong></p>
+              <ol>
+                <li>Start with total job amount</li>
+                <li>Subtract 10% company overhead</li>
+                <li>Subtract material costs and job expenses</li>
+                <li><strong>You get 50% of what's left!</strong></li>
+              </ol>
+              
+              <p><strong>Typical Commission:</strong> 12-20% of total job value</p>
+              
+              <h5>Real Example:</h5>
+              <div class="commission-example">
+                <p><strong>$50,000 Retail Job = $9,500 in Your Pocket!</strong></p>
+                <ul>
+                  <li>Gross Revenue: $50,000</li>
+                  <li>Less Overhead (10%): -$5,000</li>
+                  <li>Less Material/Labor Costs: -$26,000</li>
+                  <li><strong>Your 50% Share: $9,500</strong></li>
+                  <li><strong>That's 19% of the total job!</strong></li>
+                </ul>
+              </div>
+              
+              <p><strong>Why Retail Jobs Pay More:</strong></p>
+              <ul>
+                <li>Higher profit margins than insurance</li>
+                <li>No insurance company restrictions</li>
+                <li>Premium pricing for premium service</li>
+                <li>Customer pays full value, not depreciated value</li>
+              </ul>
+            </div>
+          `
+        },
+        {
+          title: 'Advanced Retail Closing Techniques',
+          content: `
+            <h2>Mastering the Retail Close</h2>
+            <p>Closing retail sales requires different techniques than insurance sales. Customers are making a significant financial decision with their own money - you need to make it easy and compelling for them to say yes.</p>
+            
+            <h3>Pre-Closing Setup</h3>
+            
+            <div class="pre-closing">
+              <h4>🎯 Reading Buying Signals</h4>
+              <p>Watch for these signs that your customer is ready to buy:</p>
+              
+              <h5>Verbal Buying Signals:</h5>
+              <ul>
+                <li>"When could you start?"</li>
+                <li>"What colors do you have available?"</li>
+                <li>"How long does the installation take?"</li>
+                <li>"Do you offer financing?"</li>
+                <li>"What happens if we need to reschedule?"</li>
+                <li>"Can you show me more photos of this style?"</li>
+              </ul>
+              
+              <h5>Non-Verbal Buying Signals:</h5>
+              <ul>
+                <li>Leaning forward during presentation</li>
+                <li>Taking notes or photos</li>
+                <li>Asking detailed questions</li>
+                <li>Bringing spouse into the conversation</li>
+                <li>Looking up at their roof frequently</li>
+                <li>Nodding agreement during benefits</li>
+              </ul>
+            </div>
+            
+            <h3>The Retail Closing Sequence</h3>
+            
+            <div class="closing-sequence">
+              <h4>Step 1: The Summary Close</h4>
+              <p><strong>Purpose:</strong> Reinforce all the value before asking for the decision</p>
+              
+              <p><strong>Script:</strong> "Mr. Johnson, let me just summarize what we've covered. You're getting CertainTeed Landmark shingles with our 50-year warranty, which will increase your home's value, reduce your energy costs, and give you complete peace of mind. The investment breaks down to just $2.74 per day over the life of the roof - less than a cup of coffee. Does this make sense as a solution for your home?"</p>
+            </div>
+            
+            <div class="closing-sequence">
+              <h4>Step 2: The Assumption Close</h4>
+              <p><strong>Purpose:</strong> Act as if they've already decided</p>
+              
+              <p><strong>Script:</strong> "Great! Let's get the paperwork started. I'll need a down payment to secure your materials, and we can schedule your installation for [specific date]. Do you prefer to use a check or credit card for the down payment?"</p>
+            </div>
+            
+            <div class="closing-sequence">
+              <h4>Step 3: The Choice Close</h4>
+              <p><strong>Purpose:</strong> Give them control while directing to a decision</p>
+              
+              <p><strong>Script:</strong> "I have two spots available in my schedule - we could start next Tuesday, or would the following Monday work better for you?"</p>
+            </div>
+            
+            <h3>Overcoming Final Objections</h3>
+            
+            <div class="final-objection">
+              <h4>"We need to think about it"</h4>
+              
+              <p><strong>Response 1 - The Clarification Method:</strong></p>
+              <p>"I completely understand - this is a significant investment. Help me understand what specifically you need to think through. Is it the budget, the timing, or something about our company?"</p>
+              
+              <p><strong>Response 2 - The Risk Reversal Method:</strong></p>
+              <p>"I understand you want to be careful with this decision. What if I told you that with our 50-year warranty, this is actually the safest decision you could make? You're not risking anything - you're eliminating risk."</p>
+            </div>
+            
+            <div class="final-objection">
+              <h4>"We want to get other quotes"</h4>
+              
+              <p><strong>Response:</strong></p>
+              <p>"That's smart business - I'd do the same thing. When you get other quotes, here's what to compare:</p>
+              <ul>
+                <li>What's their warranty coverage and for how long?</li>
+                <li>What quality of materials are they using?</li>
+                <li>How do they handle problems that come up?</li>
+                <li>What's their process for keeping you informed?</li>
+                <li>Most importantly - will they be here in 10 years if you need them?</li>
+              </ul>
+              <p>Compare those answers to what I've shown you today, and I'm confident you'll see the difference. What would it take for you to move forward with us today?"</p>
+            </div>
+            
+            <h3>The Closing Moment</h3>
+            
+            <div class="closing-moment">
+              <h4>🎯 The Golden Rule of Closing</h4>
+              <div class="golden-rule-box">
+                <p><strong>After you ask for the sale, SHUT UP!</strong></p>
+                <p>The first person to speak usually loses. Let them process your request. Stay quiet and let them respond. Silence is your friend in this moment.</p>
+              </div>
+              
+              <h4>🎉 When They Say Yes</h4>
+              <ul>
+                <li><strong>Congratulate them:</strong> "Congratulations! You've made an excellent decision."</li>
+                <li><strong>Reinforce the decision:</strong> "You're going to love this roof."</li>
+                <li><strong>Get paperwork started immediately:</strong> Don't give them time to change their mind</li>
+                <li><strong>Set expectations:</strong> Explain exactly what happens next</li>
+              </ul>
+            </div>
+          `
+        }
+      ]
+    },
+    presentation: {
+      title: 'Customer Presentations',
+      icon: Target,
+      color: 'bg-indigo-500',
+      lessons: [
+        {
+          title: 'Perfect Roof Inspection',
+          content: `
+            <h2>Conducting Professional Roof Inspections</h2>
+            <p>A roof inspection is like being a doctor for houses - you need to examine everything carefully and explain what you find in simple terms.</p>
+            
+            <h3>Pre-Inspection Checklist</h3>
+            
+            <div class="checklist-item">
+              <h4>🎒 Equipment to Bring</h4>
+              <ul>
+                <li>✅ Drone (charged and ready)</li>
+                <li>✅ CompanyCam app on phone</li>
+                <li>✅ Ladder (if needed)</li>
+                <li>✅ Business cards and brochures</li>
+                <li>✅ Service agreement forms</li>
+              </ul>
+            </div>
+            
+            <div class="checklist-item">
+              <h4>🔍 What to Inspect</h4>
+              <ul>
+                <li>✅ Shingle condition (missing, curled, cracked)</li>
+                <li>✅ Granule loss</li>
+                <li>✅ Gutters and downspouts</li>
+                <li>✅ Flashing around chimneys, vents, skylights</li>
+                <li>✅ Siding for hail damage</li>
+              </ul>
+            </div>
+            
+            <h3>The BRN Inspection Process</h3>
+            
+            <div class="inspection-step">
+              <h4>Step 1: Ground Level Walk-Around (5 minutes)</h4>
+              <p><strong>What to Do:</strong></p>
+              <ul>
+                <li>Walk around the entire house</li>
+                <li>Look for obvious damage from the ground</li>
+                <li>Check gutters for granules</li>
+                <li>Take photos of any visible damage</li>
+              </ul>
+            </div>
+            
+            <div class="inspection-step">
+              <h4>Step 2: Drone Inspection (10 minutes)</h4>
+              <p><strong>What to Do:</strong></p>
+              <ul>
+                <li>Launch drone safely</li>
+                <li>Fly systematic pattern over entire roof</li>
+                <li>Capture close-up photos of damage</li>
+                <li>Take wide shots for context</li>
+              </ul>
+            </div>
+            
+            <div class="inspection-step">
+              <h4>Step 3: Documentation (5 minutes)</h4>
+              <p><strong>What to Do:</strong></p>
+              <ul>
+                <li>Organize photos in CompanyCam</li>
+                <li>Add notes to each photo</li>
+                <li>Mark up damage clearly</li>
+                <li>Prepare for presentation</li>
+              </ul>
+            </div>
+          `
+        }
+      ]
+    },
+    techniques: {
+      title: 'Sales Techniques',
+      icon: Award,
+      color: 'bg-pink-500',
+      lessons: [
+        {
+          title: 'Building Rapport & Trust',
+          content: `
+            <h2>The Foundation of Every Sale: Trust</h2>
+            <p>People buy from people they like and trust. Before anyone cares about your roof knowledge, they need to feel comfortable with YOU!</p>
+            
+            <h3>The First 2 Minutes are Everything</h3>
+            
+            <div class="rapport-technique">
+              <h4>👁️ Eye Contact & Smile</h4>
+              <p><strong>Do:</strong> Make genuine eye contact and smile naturally</p>
+              <p><strong>Don't:</strong> Stare intensely or fake smile</p>
+              <p><strong>Tip:</strong> If you're nervous, look at the spot between their eyebrows!</p>
+            </div>
+            
+            <div class="rapport-technique">
+              <h4>🤝 Mirror Their Energy</h4>
+              <p><strong>If they're energetic:</strong> Match their enthusiasm</p>
+              <p><strong>If they're calm:</strong> Speak slower and softer</p>
+              <p><strong>Golden Rule:</strong> Never be higher energy than your customer</p>
+            </div>
+            
+            <div class="rapport-technique">
+              <h4>🗣️ Use Their Name</h4>
+              <p><strong>Rule:</strong> Use their name at least 3 times in the first conversation</p>
+              <p><strong>Examples:</strong></p>
+              <ul>
+                <li>"Nice to meet you, Mr. Johnson"</li>
+                <li>"Mr. Johnson, let me show you what I found"</li>
+                <li>"Does that make sense, Mr. Johnson?"</li>
+              </ul>
+            </div>
+            
+            <h3>Trust-Building Strategies</h3>
+            
+            <div class="trust-strategy">
+              <h4>📱 Show Social Proof</h4>
+              <ul>
+                <li>Pull up reviews on your phone</li>
+                <li>Show photos of recent jobs in their neighborhood</li>
+                <li>Mention specific neighbors you've helped</li>
+              </ul>
+            </div>
+            
+            <div class="trust-strategy">
+              <h4>🤲 Be Genuinely Helpful</h4>
+              <ul>
+                <li>Offer free advice even if they don't buy</li>
+                <li>Point out things that aren't problems</li>
+                <li>Be honest about what they don't need</li>
+              </ul>
+            </div>
+          `
+        },
+        {
+          title: 'Overcoming Objections',
+          content: `
+            <h2>Objections are Buying Signals in Disguise</h2>
+            <p>When customers object, they're not saying no - they're asking for more information!</p>
+            
+            <h3>Top 5 Objections & Perfect Responses</h3>
+            
+            <div class="objection-response-card">
+              <h4>1. "I need to think about it"</h4>
+              <p><strong>Response:</strong> "I completely understand - this is a big decision. Help me understand what specifically you'd like to think through. Is it the investment, the timeline, or something about our company?"</p>
+            </div>
+            
+            <div class="objection-response-card">
+              <h4>2. "That's too expensive"</h4>
+              <p><strong>Response:</strong> "I understand price is important. This investment breaks down to about $X per day over 30 years. For less than the cost of a coffee, you get complete protection for your most valuable asset."</p>
+            </div>
+            
+            <div class="objection-response-card">
+              <h4>3. "I want to get other quotes"</h4>
+              <p><strong>Response:</strong> "That's smart! When you do, make sure you're comparing the same things - materials, warranty, and service. Most importantly, compare the companies themselves."</p>
+            </div>
+            
+            <div class="objection-response-card">
+              <h4>4. "I don't see any damage"</h4>
+              <p><strong>Response:</strong> "That's exactly why we use drone technology! From the ground, hail damage is almost impossible to see. Let me show you these close-up photos."</p>
+            </div>
+            
+            <div class="objection-response-card">
+              <h4>5. "I need to talk to my spouse"</h4>
+              <p><strong>Response:</strong> "Of course! Would it be helpful if I came back when you're both available? Or would you prefer to call them now so we can all discuss this together?"</p>
+            </div>
+            
+            <h3>The Secret to Objection Handling</h3>
+            <div class="objection-secret">
+              <p><strong>Never argue with a customer!</strong> Instead, agree with their concern and redirect: "You're absolutely right to be concerned about that. Let me show you how we handle that exact issue..."</p>
+            </div>
+          `
+        }
+      ]
+    }
+  };
+
+  const calculateProgress = () => {
+    const totalLessons = Object.values(modules).reduce((sum, module) => sum + module.lessons.length, 0);
+    const completed = completedLessons.size;
+    return { total: totalLessons, completed, percentage: totalLessons > 0 ? (completed / totalLessons) * 100 : 0 };
+  };
+
+  const markLessonComplete = (moduleKey, lessonIndex) => {
+    const lessonId = `${moduleKey}-${lessonIndex}`;
+    if (!completedLessons.has(lessonId)) {
+      setCompletedLessons(prev => new Set([...prev, lessonId]));
+    }
+  };
+
+  const isLessonComplete = (moduleKey, lessonIndex) => {
+    return completedLessons.has(`${moduleKey}-${lessonIndex}`);
+  };
+
+  const progress = calculateProgress();
+
+  const renderDashboard = () => (
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to BRN Sales Training</h1>
+        <p className="text-gray-600">Master the art of roofing sales with our comprehensive training program</p>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Your Progress</h2>
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700">Overall Completion</span>
+            <span className="text-sm font-medium text-blue-600">{progress.completed}/{progress.total} lessons</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{width: `${progress.percentage}%`}}></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">{progress.completed}</div>
+            <div className="text-sm text-gray-600">Lessons Complete</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">0</div>
+            <div className="text-sm text-gray-600">Current Streak</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-600">0</div>
+            <div className="text-sm text-gray-600">Badges Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Object.entries(modules).filter(([key]) => key !== 'dashboard').map(([key, module]) => {
+          const moduleProgress = module.lessons.length > 0 
+            ? (module.lessons.filter((_, index) => isLessonComplete(key, index)).length / module.lessons.length) * 100 
+            : 0;
+          
+          return (
+            <div key={key} 
+                 className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                 onClick={() => setCurrentModule(key)}>
+              <div className={`w-12 h-12 ${module.color} rounded-lg flex items-center justify-center mb-4`}>
+                <module.icon className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">{module.title}</h3>
+              <p className="text-gray-600 text-sm mb-3">{module.lessons.length} lessons</p>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className={`bg-green-500 h-2 rounded-full transition-all duration-300`} 
+                     style={{width: `${moduleProgress}%`}}></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderModule = () => {
+    const module = modules[currentModule];
+    if (!module || module.lessons.length === 0) return renderDashboard();
+
+    const lesson = module.lessons[currentLesson];
+    if (!lesson) return renderDashboard();
+
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <button onClick={() => setCurrentModule('dashboard')} 
+                    className="mr-4 p-2 hover:bg-gray-100 rounded-lg">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div className={`w-10 h-10 ${module.color} rounded-lg flex items-center justify-center mr-3`}>
+              <module.icon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">{module.title}</h1>
+              <p className="text-gray-600">Lesson {currentLesson + 1} of {module.lessons.length}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {isLessonComplete(currentModule, currentLesson) && (
+              <CheckCircle className="w-6 h-6 text-green-500" />
+            )}
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                 style={{width: `${((currentLesson + 1) / module.lessons.length) * 100}%`}}></div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-8 mb-6">
+          <h2 className="text-2xl font-bold mb-6">{lesson.title}</h2>
+          <div className="prose max-w-none lesson-content" 
+               dangerouslySetInnerHTML={{ __html: lesson.content }} />
+        </div>
+
+        <div className="flex justify-between items-center">
+          <button 
+            onClick={() => setCurrentLesson(Math.max(0, currentLesson - 1))}
+            disabled={currentLesson === 0}
+            className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <ChevronLeft className="w-4 h-4 mr-2" />
+            Previous
+          </button>
+
+          <button 
+            onClick={() => markLessonComplete(currentModule, currentLesson)}
+            className={`px-6 py-2 rounded-lg ${
+              isLessonComplete(currentModule, currentLesson) 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}>
+            {isLessonComplete(currentModule, currentLesson) ? 'Completed' : 'Mark Complete'}
+          </button>
+
+          <button 
+            onClick={() => setCurrentLesson(Math.min(module.lessons.length - 1, currentLesson + 1))}
+            disabled={currentLesson === module.lessons.length - 1}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            Next
+            <ChevronRight className="w-4 h-4 ml-2" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSidebar = () => (
+    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      <div className="flex items-center justify-between h-16 px-6 border-b">
+        <h1 className="text-xl font-bold text-blue-600">BRN Training</h1>
+        <button onClick={() => setSidebarOpen(false)} className="lg:hidden">
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+      
+      <nav className="mt-6">
+        {Object.entries(modules).map(([key, module]) => (
+          <button
+            key={key}
+            onClick={() => {
+              setCurrentModule(key);
+              setCurrentLesson(0);
+              setSidebarOpen(false);
+            }}
+            className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 ${
+              currentModule === key ? 'bg-blue-50 border-r-2 border-blue-600' : ''
+            }`}>
+            <module.icon className={`w-5 h-5 mr-3 ${currentModule === key ? 'text-blue-600' : 'text-gray-500'}`} />
+            <div>
+              <div className={`font-medium ${currentModule === key ? 'text-blue-600' : 'text-gray-900'}`}>
+                {module.title}
+              </div>
+              {module.lessons.length > 0 && (
+                <div className="text-sm text-gray-500">
+                  {module.lessons.filter((_, index) => isLessonComplete(key, index)).length}/{module.lessons.length} complete
+                </div>
+              )}
+            </div>
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {renderSidebar()}
+      
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+             onClick={() => setSidebarOpen(false)}></div>
+      )}
+
+      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
+        <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3">
+          <button onClick={() => setSidebarOpen(true)}>
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+
+        <main className="flex-1 overflow-auto">
+          {currentModule === 'dashboard' ? renderDashboard() : renderModule()}
+        </main>
+      </div>
+
+      <style jsx>{`
+        .lesson-content h2 {
+          font-size: 1.5rem;
+          font-weight: bold;
+          margin: 1.5rem 0 1rem 0;
+          color: #1f2937;
+        }
+        .lesson-content h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin: 1.25rem 0 0.75rem 0;
+          color: #374151;
+        }
+        .lesson-content h4 {
+          font-size: 1.125rem;
+          font-weight: 600;
+          margin: 1rem 0 0.5rem 0;
+          color: #4b5563;
+        }
+        .lesson-content p {
+          margin: 0.75rem 0;
+          line-height: 1.6;
+          color: #4b5563;
+        }
+        .lesson-content ul, .lesson-content ol {
+          margin: 0.75rem 0;
+          padding-left: 1.5rem;
+        }
+        .lesson-content li {
+          margin: 0.25rem 0;
+          color: #4b5563;
+        }
+        .story-section, .value-deep-dive, .competitive-advantage, .psychology-principle, .body-language-guide, .script-breakdown, .script-variation, .product-card, .component-section, .process-step, .estimate-section, .mindset-comparison, .retail-motivation, .commission-breakdown, .commission-example, .pre-closing, .closing-sequence, .final-objection, .closing-moment, .golden-rule-box, .checklist-item, .inspection-step, .rapport-technique, .trust-strategy, .objection-response-card, .objection-secret, .warranty-breakdown, .positioning-strategy, .warranty-objection {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.5rem;
+          padding: 1rem;
+          margin: 1rem 0;
+        }
+        .script-text {
+          background: #eff6ff;
+          border-left: 4px solid #3b82f6;
+          padding: 1rem;
+          margin: 0.5rem 0;
+        }
+        .script-note {
+          font-style: italic;
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+        .golden-rule-box {
+          background: #fef3c7;
+          border-left: 4px solid #f59e0b;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default TrainingApp;
