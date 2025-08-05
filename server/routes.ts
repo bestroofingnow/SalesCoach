@@ -1,50 +1,94 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
-import { insertProgressSchema, insertQuizResponseSchema } from "@shared/schema";
+import { insertProgressSchema, insertQuizResponseSchema, loginSchema, createUserByAdminSchema } from "@shared/schema";
 import { generateContextualHint, generateQuizHint, explainConcept } from "./ai-hints";
+import { authenticateUser, authMiddleware, adminMiddleware, hashPassword } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // For development, create a simple auth middleware that creates a test user
-  const devAuth = async (req: any, res: any, next: any) => {
-    // Create or get test user
-    let testUser;
-    try {
-      testUser = await storage.getUser('test-user-123');
-      if (!testUser) {
-        testUser = await storage.upsertUser({
-          id: 'test-user-123',
-          email: 'test@example.com',
-          firstName: 'John',
-          lastName: 'Doe',
-          profileImageUrl: null,
-          role: 'trainee'
-        });
-      }
-      req.user = { claims: { sub: testUser.id } };
-      next();
-    } catch (error) {
-      console.error("Dev auth error:", error);
-      res.status(500).json({ message: "Dev auth failed" });
-    }
-  };
+  // Initialize database on startup
+  const { initializeDatabase } = await import('./init-db');
+  await initializeDatabase();
 
-  // Auth routes
-  app.get('/api/auth/user', devAuth, async (req: any, res) => {
+  // Public auth routes (no authentication required)
+  app.post('/api/auth/login', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const loginData = loginSchema.parse(req.body);
+      const result = await authenticateUser(loginData);
+      
+      if (!result) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      
+      // Return user data without password
+      const { password, ...userWithoutPassword } = result.user;
+      res.json({ user: userWithoutPassword, token: result.token });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid login data", errors: error.errors });
+      }
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Protected auth routes
+  app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
+    try {
+      const { password, ...userWithoutPassword } = req.user;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
+  // Admin routes
+  app.post('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const userData = createUserByAdminSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+      
+      // Hash password and create user
+      const hashedPassword = await hashPassword(userData.password);
+      const { password, ...userDataWithoutPassword } = userData;
+      
+      const newUser = await storage.createUser({
+        ...userDataWithoutPassword,
+        password: hashedPassword
+      });
+      
+      const { password: _, ...userWithoutPassword } = newUser;
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      }
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      // Remove passwords from response
+      const usersWithoutPasswords = allUsers.map(({ password, ...user }) => user);
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
   // Training tracks
-  app.get('/api/tracks', devAuth, async (req, res) => {
+  app.get('/api/tracks', authMiddleware, async (req, res) => {
     try {
       const tracks = await storage.getTrainingTracks();
       res.json(tracks);
@@ -55,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Training modules for a track
-  app.get('/api/tracks/:trackId/modules', devAuth, async (req, res) => {
+  app.get('/api/tracks/:trackId/modules', authMiddleware, async (req, res) => {
     try {
       const { trackId } = req.params;
       const modules = await storage.getTrainingModules(trackId);
@@ -67,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Lessons for a module
-  app.get('/api/modules/:moduleId/lessons', devAuth, async (req, res) => {
+  app.get('/api/modules/:moduleId/lessons', authMiddleware, async (req, res) => {
     try {
       const { moduleId } = req.params;
       const lessons = await storage.getLessons(moduleId);
@@ -79,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific lesson
-  app.get('/api/lessons/:lessonId', devAuth, async (req, res) => {
+  app.get('/api/lessons/:lessonId', authMiddleware, async (req, res) => {
     try {
       const { lessonId } = req.params;
       const lesson = await storage.getLesson(lessonId);
@@ -94,9 +138,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User progress
-  app.get('/api/users/progress', devAuth, async (req: any, res) => {
+  app.get('/api/users/progress', authMiddleware, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const progress = await storage.getUserProgress(userId);
       
       // Get tracks with modules for sidebar display
@@ -132,9 +176,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mark lesson as completed
-  app.post('/api/progress/lesson', devAuth, async (req: any, res) => {
+  app.post('/api/progress/lesson', authMiddleware, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const progressData = insertProgressSchema.parse({
         ...req.body,
         userId,
@@ -153,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Quiz questions for a lesson or module
-  app.get('/api/quiz/:type/:id', devAuth, async (req, res) => {
+  app.get('/api/quiz/:type/:id', authMiddleware, async (req, res) => {
     try {
       const { type, id } = req.params;
       let questions;
@@ -174,9 +218,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Submit quiz responses
-  app.post('/api/quiz/submit', devAuth, async (req: any, res) => {
+  app.post('/api/quiz/submit', authMiddleware, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { responses, quizType, quizId } = req.body;
       
       // Validate responses
@@ -194,9 +238,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User certifications
-  app.get('/api/users/certifications', devAuth, async (req: any, res) => {
+  app.get('/api/users/certifications', authMiddleware, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const certifications = await storage.getUserCertifications(userId);
       res.json(certifications);
     } catch (error) {
@@ -206,9 +250,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard stats
-  app.get('/api/dashboard/stats', devAuth, async (req: any, res) => {
+  app.get('/api/dashboard/stats', authMiddleware, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const stats = await storage.getDashboardStats(userId);
       res.json(stats);
     } catch (error) {
@@ -218,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Hints endpoints
-  app.post('/api/ai/hint', devAuth, async (req: any, res) => {
+  app.post('/api/ai/hint', authMiddleware, async (req: any, res) => {
     try {
       const { moduleTitle, lessonTitle, lessonContent, userQuestion, previousHints } = req.body;
       
@@ -241,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/ai/quiz-hint', devAuth, async (req: any, res) => {
+  app.post('/api/ai/quiz-hint', authMiddleware, async (req: any, res) => {
     try {
       const { question, options, moduleContext } = req.body;
       
@@ -257,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/ai/explain', devAuth, async (req: any, res) => {
+  app.post('/api/ai/explain', authMiddleware, async (req: any, res) => {
     try {
       const { concept, moduleContext } = req.body;
       
