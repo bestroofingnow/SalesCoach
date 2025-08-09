@@ -91,14 +91,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = parseInt(id);
       
-      if (isNaN(userId)) {
+      if (!id || typeof id !== 'string') {
         return res.status(400).json({ message: "Invalid user ID" });
       }
 
       const updateData = req.body;
-      const updatedUser = await storage.updateUser(userId.toString(), updateData);
+      const updatedUser = await storage.updateUser(id, updateData);
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
@@ -117,9 +116,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { password } = req.body;
-      const userId = parseInt(id);
       
-      if (isNaN(userId)) {
+      if (!id || typeof id !== 'string') {
         return res.status(400).json({ message: "Invalid user ID" });
       }
 
@@ -128,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const updatedUser = await storage.updateUser(userId.toString(), { password: hashedPassword });
+      const updatedUser = await storage.updateUser(id, { password: hashedPassword });
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
