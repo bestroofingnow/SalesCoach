@@ -16,7 +16,10 @@ import {
   FileText, 
   Mail,
   Edit3,
-  Sparkles 
+  Sparkles,
+  Menu,
+  X,
+  ArrowLeft 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -54,6 +57,7 @@ export default function Chat() {
   const [newConversationTitle, setNewConversationTitle] = useState("");
   const [showNewConversationDialog, setShowNewConversationDialog] = useState(false);
   const [showDraftDialog, setShowDraftDialog] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [draftForm, setDraftForm] = useState<CommunicationDraftForm>({
     type: "",
     purpose: "",
@@ -186,23 +190,36 @@ export default function Chat() {
   };
 
   return (
-    <div className="h-screen flex">
+    <div className="h-screen flex relative">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-1/3 border-r bg-card">
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-80 bg-card border-r transform transition-transform duration-200 ease-in-out
+        lg:relative lg:translate-x-0 lg:w-80 xl:w-96
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Sidebar Header */}
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
               AI Assistant
             </h2>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Dialog open={showDraftDialog} onOpenChange={setShowDraftDialog}>
                 <DialogTrigger asChild>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" className="h-9 w-9">
                     <FileText className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Draft Communication</DialogTitle>
                     <DialogDescription>
@@ -210,7 +227,7 @@ export default function Chat() {
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleGenerateDraft} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="type">Type</Label>
                         <Select value={draftForm.type} onValueChange={(value) => setDraftForm({...draftForm, type: value})}>
@@ -268,10 +285,11 @@ export default function Chat() {
                         />
                       </div>
                     )}
-                    <DialogFooter>
+                    <DialogFooter className="flex-col sm:flex-row gap-2">
                       <Button 
                         type="submit" 
                         disabled={generateDraftMutation.isPending || !draftForm.type || !draftForm.purpose || !draftForm.recipient || !draftForm.details}
+                        className="w-full sm:w-auto"
                       >
                         {generateDraftMutation.isPending ? (
                           <>
@@ -291,11 +309,11 @@ export default function Chat() {
               </Dialog>
               <Dialog open={showNewConversationDialog} onOpenChange={setShowNewConversationDialog}>
                 <DialogTrigger asChild>
-                  <Button size="sm">
+                  <Button size="sm" className="h-9 w-9">
                     <Plus className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-md">
                   <DialogHeader>
                     <DialogTitle>New Conversation</DialogTitle>
                     <DialogDescription>
@@ -315,39 +333,55 @@ export default function Chat() {
                       </div>
                     </div>
                     <DialogFooter className="mt-4">
-                      <Button type="submit" disabled={createConversationMutation.isPending || !newConversationTitle.trim()}>
+                      <Button 
+                        type="submit" 
+                        disabled={createConversationMutation.isPending || !newConversationTitle.trim()}
+                        className="w-full sm:w-auto"
+                      >
                         {createConversationMutation.isPending ? "Creating..." : "Create Conversation"}
                       </Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
               </Dialog>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="lg:hidden h-9 w-9" 
+                onClick={() => setSidebarOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
         
+        {/* Sidebar Content */}
         <ScrollArea className="h-[calc(100vh-80px)]">
           {conversationsLoading ? (
             <div className="p-4">Loading conversations...</div>
           ) : conversations.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
               <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No conversations yet</p>
+              <p className="font-medium">No conversations yet</p>
               <p className="text-sm">Start a new conversation to begin</p>
             </div>
           ) : (
-            <div className="p-2">
+            <div className="p-3">
               {conversations.map((conversation) => (
                 <Card
                   key={conversation.id}
-                  className={`p-3 mb-2 cursor-pointer transition-colors ${
+                  className={`p-4 mb-2 cursor-pointer transition-all duration-200 hover:shadow-sm ${
                     selectedConversationId === conversation.id
-                      ? "bg-primary/10 border-primary"
-                      : "hover:bg-muted"
+                      ? "bg-primary/10 border-primary shadow-sm"
+                      : "hover:bg-muted/50"
                   }`}
-                  onClick={() => setSelectedConversationId(conversation.id)}
+                  onClick={() => {
+                    setSelectedConversationId(conversation.id);
+                    setSidebarOpen(false); // Close sidebar on mobile after selection
+                  }}
                 >
-                  <div className="font-medium truncate">{conversation.title}</div>
+                  <div className="font-medium truncate mb-1">{conversation.title}</div>
                   <div className="text-sm text-muted-foreground">
                     {conversation.updatedAt ? new Date(conversation.updatedAt).toLocaleDateString() : 'New'}
                   </div>
@@ -359,21 +393,31 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-0">
         {selectedConversationId ? (
           <>
-            {/* Chat Header */}
+            {/* Mobile Chat Header with Menu */}
             <div className="p-4 border-b bg-card">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">
-                    {conversations.find(c => c.id === selectedConversationId)?.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    AI Assistant powered by training content
-                  </p>
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="lg:hidden h-9 w-9" 
+                    onClick={() => setSidebarOpen(true)}
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                  <div>
+                    <h3 className="font-semibold text-sm sm:text-base">
+                      {conversations.find(c => c.id === selectedConversationId)?.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      AI Assistant powered by training content
+                    </p>
+                  </div>
                 </div>
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                   <Bot className="h-3 w-3" />
                   Online
                 </Badge>
@@ -383,15 +427,17 @@ export default function Chat() {
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
               {messagesLoading ? (
-                <div className="text-center text-muted-foreground">Loading messages...</div>
+                <div className="text-center text-muted-foreground py-8">
+                  <div className="animate-pulse">Loading messages...</div>
+                </div>
               ) : messages.length === 0 ? (
-                <div className="text-center text-muted-foreground">
-                  <Bot className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Start the conversation!</p>
-                  <p className="text-sm">Ask me anything about roofing, training content, or request help with communications.</p>
+                <div className="text-center text-muted-foreground py-12">
+                  <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium mb-2">Start the conversation!</p>
+                  <p className="text-sm max-w-md mx-auto">Ask me anything about roofing, training content, or request help with communications.</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 pb-4">
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -399,7 +445,7 @@ export default function Chat() {
                         message.role === "user" ? "flex-row-reverse" : ""
                       }`}
                     >
-                      <Avatar className="w-8 h-8">
+                      <Avatar className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0">
                         <AvatarFallback>
                           {message.role === "user" ? (
                             <User className="h-4 w-4" />
@@ -409,12 +455,12 @@ export default function Chat() {
                         </AvatarFallback>
                       </Avatar>
                       <div
-                        className={`flex-1 max-w-[80%] ${
+                        className={`flex-1 max-w-[85%] sm:max-w-[75%] ${
                           message.role === "user" ? "text-right" : ""
                         }`}
                       >
                         <div
-                          className={`rounded-lg p-3 ${
+                          className={`rounded-2xl px-4 py-3 text-sm sm:text-base ${
                             message.role === "user"
                               ? "bg-primary text-primary-foreground ml-auto"
                               : "bg-muted"
@@ -422,8 +468,11 @@ export default function Chat() {
                         >
                           <div className="whitespace-pre-wrap">{message.content}</div>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {message.createdAt ? new Date(message.createdAt).toLocaleTimeString() : 'Now'}
+                        <div className="text-xs text-muted-foreground mt-1 px-1">
+                          {message.createdAt ? new Date(message.createdAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'Now'}
                         </div>
                       </div>
                     </div>
@@ -433,20 +482,21 @@ export default function Chat() {
               )}
             </ScrollArea>
 
-            {/* Message Input */}
+            {/* Message Input - Enhanced for Mobile */}
             <div className="p-4 border-t bg-card">
               <form onSubmit={handleSendMessage} className="flex gap-2">
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Ask about roofing techniques, training content, or request help with communications..."
+                  placeholder="Type your message..."
                   disabled={sendMessageMutation.isPending}
-                  className="flex-1"
+                  className="flex-1 h-11 text-base"
                 />
                 <Button 
                   type="submit" 
                   disabled={sendMessageMutation.isPending || !newMessage.trim()}
                   size="icon"
+                  className="h-11 w-11 flex-shrink-0"
                 >
                   {sendMessageMutation.isPending ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
@@ -458,15 +508,41 @@ export default function Chat() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center text-muted-foreground">
-            <div>
-              <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-semibold mb-2">Welcome to AI Assistant</h3>
-              <p className="mb-4">Select a conversation or create a new one to get started.</p>
-              <div className="space-y-2 text-sm">
-                <p>✨ Ask questions about roofing techniques and training content</p>
-                <p>📧 Get help drafting professional communications</p>
-                <p>🎯 Access company-specific guidance and best practices</p>
+          <div className="flex-1 flex flex-col">
+            {/* Mobile header for when no conversation is selected */}
+            <div className="p-4 border-b bg-card lg:hidden">
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-9 w-9" 
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+                <h2 className="font-semibold">AI Assistant</h2>
+              </div>
+            </div>
+            
+            <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-6">
+              <div className="max-w-md">
+                <MessageCircle className="h-16 w-16 mx-auto mb-6 opacity-50" />
+                <h3 className="text-xl font-semibold mb-3">Welcome to AI Assistant</h3>
+                <p className="mb-6 text-muted-foreground">Select a conversation or create a new one to get started.</p>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="text-2xl">✨</div>
+                    <p>Ask questions about roofing techniques and training content</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="text-2xl">📧</div>
+                    <p>Get help drafting professional communications</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="text-2xl">🎯</div>
+                    <p>Access company-specific guidance and best practices</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
