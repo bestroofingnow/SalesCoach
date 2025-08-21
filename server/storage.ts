@@ -7,6 +7,8 @@ import {
   userProgress, 
   userCertifications,
   certifications,
+  chatConversations,
+  chatMessages,
   type User, 
   type UpsertUser, 
   type TrainingTrack, 
@@ -15,6 +17,10 @@ import {
   type QuizQuestion, 
   type UserProgress, 
   type UserCertification,
+  type ChatConversation,
+  type ChatMessage,
+  type InsertChatConversation,
+  type InsertChatMessage,
   type InsertProgress,
   type QuizResponse 
 } from "@shared/schema";
@@ -49,6 +55,13 @@ export interface IStorage {
   
   // Dashboard methods
   getDashboardStats(userId: string): Promise<any>;
+  
+  // Chat methods
+  createChatConversation(conversation: InsertChatConversation): Promise<ChatConversation>;
+  getChatConversations(userId: string): Promise<ChatConversation[]>;
+  getChatMessages(conversationId: string): Promise<ChatMessage[]>;
+  addChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  updateConversationTitle(conversationId: string, title: string): Promise<ChatConversation>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -271,6 +284,57 @@ export class DatabaseStorage implements IStorage {
     };
     
     return stats;
+  }
+
+  async createChatConversation(conversationData: InsertChatConversation): Promise<ChatConversation> {
+    const [conversation] = await db
+      .insert(chatConversations)
+      .values(conversationData)
+      .returning();
+    return conversation;
+  }
+
+  async getChatConversations(userId: string): Promise<ChatConversation[]> {
+    return await db
+      .select()
+      .from(chatConversations)
+      .where(eq(chatConversations.userId, userId))
+      .orderBy(sql`${chatConversations.updatedAt} DESC`);
+  }
+
+  async getChatMessages(conversationId: string): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.conversationId, conversationId))
+      .orderBy(chatMessages.createdAt);
+  }
+
+  async addChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
+    const [message] = await db
+      .insert(chatMessages)
+      .values(messageData)
+      .returning();
+    
+    // Update conversation timestamp
+    await db
+      .update(chatConversations)
+      .set({ updatedAt: sql`NOW()` })
+      .where(eq(chatConversations.id, messageData.conversationId));
+    
+    return message;
+  }
+
+  async updateConversationTitle(conversationId: string, title: string): Promise<ChatConversation> {
+    const [conversation] = await db
+      .update(chatConversations)
+      .set({ 
+        title,
+        updatedAt: sql`NOW()` 
+      })
+      .where(eq(chatConversations.id, conversationId))
+      .returning();
+    return conversation;
   }
 }
 

@@ -53,9 +53,19 @@ export default function Sidebar() {
           <Button 
             variant="ghost" 
             className="w-full justify-start bg-blue-500 text-white hover:bg-blue-600"
+            onClick={() => window.location.href = '/'}
           >
             <i className="fas fa-tachometer-alt w-5 mr-3"></i>
             <span className="font-medium">Dashboard</span>
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-gray-600 hover:bg-gray-50"
+            onClick={() => window.location.href = '/chat'}
+          >
+            <i className="fas fa-comments w-5 mr-3"></i>
+            <span className="font-medium">AI Assistant</span>
           </Button>
           
           {/* Training Tracks */}

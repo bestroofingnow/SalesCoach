@@ -2,8 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertProgressSchema, insertQuizResponseSchema, loginSchema, createUserByAdminSchema } from "@shared/schema";
+import { insertProgressSchema, insertQuizResponseSchema, loginSchema, createUserByAdminSchema, insertChatConversationSchema, insertChatMessageSchema } from "@shared/schema";
 import { generateContextualHint, generateQuizHint, explainConcept } from "./ai-hints";
+import { generateChatResponse, generateCommunicationDraft } from "./chat-service";
 import { authenticateUser, authMiddleware, adminMiddleware, hashPassword } from "./auth";
 import bcrypt from "bcryptjs";
 
@@ -366,6 +367,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error explaining concept:", error);
       res.status(500).json({ message: "Failed to explain concept" });
+    }
+  });
+
+  // Chat routes
+  app.get('/api/chat/conversations', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const conversations = await storage.getChatConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.post('/api/chat/conversations', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { title } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ message: "Title is required" });
+      }
+      
+      const conversationData = insertChatConversationSchema.parse({
+        userId,
+        title
+      });
+      
+      const conversation = await storage.createChatConversation(conversationData);
+      res.status(201).json(conversation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid conversation data", errors: error.errors });
+      }
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  app.get('/api/chat/conversations/:id/messages', authMiddleware, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      // Verify user owns this conversation
+      const conversations = await storage.getChatConversations(userId);
+      const conversation = conversations.find(c => c.id === id);
+      
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      const messages = await storage.getChatMessages(id);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post('/api/chat/conversations/:id/messages', authMiddleware, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const { content } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "Message content is required" });
+      }
+      
+      // Verify user owns this conversation
+      const conversations = await storage.getChatConversations(userId);
+      const conversation = conversations.find(c => c.id === id);
+      
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      // Save user message
+      const userMessageData = insertChatMessageSchema.parse({
+        conversationId: id,
+        role: 'user',
+        content
+      });
+      
+      const userMessage = await storage.addChatMessage(userMessageData);
+      
+      // Get conversation history for context
+      const allMessages = await storage.getChatMessages(id);
+      const conversationHistory = allMessages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+      
+      // Generate AI response
+      const aiResponse = await generateChatResponse(
+        content,
+        {
+          userId,
+          userRole: req.user.role,
+        },
+        conversationHistory.slice(0, -1) // Exclude the current message
+      );
+      
+      // Save AI response
+      const aiMessageData = insertChatMessageSchema.parse({
+        conversationId: id,
+        role: 'assistant',
+        content: aiResponse
+      });
+      
+      const aiMessage = await storage.addChatMessage(aiMessageData);
+      
+      // Return both messages
+      res.json({
+        userMessage,
+        aiMessage
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid message data", errors: error.errors });
+      }
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.post('/api/chat/draft-communication', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { type, purpose, recipient, details } = req.body;
+      
+      if (!type || !purpose || !recipient || !details) {
+        return res.status(400).json({ message: "All fields are required: type, purpose, recipient, details" });
+      }
+      
+      const draft = await generateCommunicationDraft(
+        type,
+        purpose,
+        recipient,
+        details,
+        {
+          userId,
+          userRole: req.user.role,
+        }
+      );
+      
+      res.json({ draft });
+    } catch (error) {
+      console.error("Error generating communication draft:", error);
+      res.status(500).json({ message: "Failed to generate communication draft" });
+    }
+  });
+
+  app.put('/api/chat/conversations/:id/title', authMiddleware, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const { title } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ message: "Title is required" });
+      }
+      
+      // Verify user owns this conversation
+      const conversations = await storage.getChatConversations(userId);
+      const conversation = conversations.find(c => c.id === id);
+      
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      const updatedConversation = await storage.updateConversationTitle(id, title);
+      res.json(updatedConversation);
+    } catch (error) {
+      console.error("Error updating conversation title:", error);
+      res.status(500).json({ message: "Failed to update conversation title" });
     }
   });
 
