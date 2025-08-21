@@ -25,7 +25,7 @@ import {
   type QuizResponse 
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, count, sql } from "drizzle-orm";
+import { eq, and, count, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -185,12 +185,17 @@ export class DatabaseStorage implements IStorage {
     quizType: string, 
     quizId: string
   ): Promise<{ score: number; passed: boolean }> {
+    // Validate inputs
+    if (!responses || responses.length === 0) {
+      throw new Error('No quiz responses provided');
+    }
+    
     // Get the correct answers for validation
     const questionIds = responses.map(r => r.questionId);
     const questions = await db
       .select()
       .from(quizQuestions)
-      .where(sql`${quizQuestions.id} = ANY(${questionIds})`);
+      .where(inArray(quizQuestions.id, questionIds));
     
     // Calculate score
     let correctAnswers = 0;
@@ -201,7 +206,8 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    const score = Math.round((correctAnswers / responses.length) * 100);
+    // Prevent division by zero
+    const score = responses.length > 0 ? Math.round((correctAnswers / responses.length) * 100) : 0;
     const passed = score >= 70; // 70% passing threshold
     
     // Record the quiz completion
@@ -256,19 +262,21 @@ export class DatabaseStorage implements IStorage {
     const totalModulesCount = totalModules?.count || 0;
     const totalLessonsCount = totalLessons?.count || 0;
     
-    // Create the expected frontend structure
+    // Create the expected frontend structure with safe division
+    const safeTotal = Math.max(totalLessonsCount, 1); // Ensure minimum of 1
+    const trackTotal = Math.max(Math.floor(safeTotal / 3), 1); // Ensure minimum of 1 per track
     const stats = {
       residential: {
-        completed: Math.floor(completedLessons / 3), // Distribute across tracks
-        total: Math.floor(totalLessonsCount / 3) || 1
+        completed: totalLessonsCount > 0 ? Math.floor(completedLessons / 3) : 0,
+        total: trackTotal
       },
       commercial: {
-        completed: Math.floor(completedLessons / 3),
-        total: Math.floor(totalLessonsCount / 3) || 1
+        completed: totalLessonsCount > 0 ? Math.floor(completedLessons / 3) : 0,
+        total: trackTotal
       },
       restoration: {
-        completed: Math.floor(completedLessons / 3),
-        total: Math.floor(totalLessonsCount / 3) || 1
+        completed: totalLessonsCount > 0 ? Math.floor(completedLessons / 3) : 0,
+        total: trackTotal
       },
       certifications: {
         earned: completedTracks,

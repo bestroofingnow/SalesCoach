@@ -16,6 +16,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public auth routes (no authentication required)
   app.post('/api/auth/login', async (req, res) => {
     try {
+      if (!req.body) {
+        return res.status(400).json({ message: "Request body is required" });
+      }
       const loginData = loginSchema.parse(req.body);
       const result = await authenticateUser(loginData);
       
@@ -38,6 +41,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Protected auth routes
   app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const { password, ...userWithoutPassword } = req.user;
       res.json(userWithoutPassword);
     } catch (error) {
@@ -49,6 +55,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes
   app.post('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
+      if (!req.body) {
+        return res.status(400).json({ message: "Request body is required" });
+      }
       const userData = createUserByAdminSchema.parse(req.body);
       
       // Check if user already exists
@@ -231,6 +240,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mark lesson as completed
   app.post('/api/progress/lesson', authMiddleware, async (req: any, res) => {
     try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      if (!req.body) {
+        return res.status(400).json({ message: "Request body is required" });
+      }
       const userId = req.user.id;
       const progressData = insertProgressSchema.parse({
         ...req.body,
@@ -273,6 +288,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Submit quiz responses
   app.post('/api/quiz/submit', authMiddleware, async (req: any, res) => {
     try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      if (!req.body) {
+        return res.status(400).json({ message: "Request body is required" });
+      }
       const userId = req.user.id;
       const { responses, quizType, quizId } = req.body;
       

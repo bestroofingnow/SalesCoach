@@ -16,7 +16,12 @@ export async function initializeDatabase() {
       .limit(1);
     
     if (existingAdmin.length === 0) {
-      const hashedPassword = await hashPassword('admin123'); // Default password - should be changed
+      // Generate a secure random password for the admin user
+      const securePassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).toUpperCase().slice(-6);
+      const hashedPassword = await hashPassword(securePassword);
+      console.log(`\n🔐 IMPORTANT: Admin user created with password: ${securePassword}`);
+      console.log('📧 Admin email: james@bestroofingnow.com');
+      console.log('⚠️  Please save this password and change it after first login!\n');
       await db.insert(users).values({
         email: adminEmail,
         password: hashedPassword,
@@ -25,7 +30,7 @@ export async function initializeDatabase() {
         role: 'admin',
         isActive: true
       });
-      console.log('Created super admin user: james@bestroofingnow.com');
+      console.log('✅ Created super admin user: james@bestroofingnow.com');
     }
     
     // Check if we have training tracks, if not, create them
