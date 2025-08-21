@@ -1,17 +1,16 @@
 import OpenAI from "openai";
 import { storage } from "./storage";
 
-let openai: OpenAI | null = null;
-
 function getOpenAIClient(): OpenAI {
-  if (!openai) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY environment variable is required for chat features');
-    }
-    openai = new OpenAI({ apiKey });
+  const apiKey = process.env.OPENAI_API_KEY;
+  console.log('OpenAI API Key status:', apiKey ? `Available (starts with: ${apiKey.substring(0, 15)}...)` : 'Not found');
+  
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is required for chat features');
   }
-  return openai;
+  
+  // Always create a fresh client to ensure we get the latest API key
+  return new OpenAI({ apiKey });
 }
 
 interface ChatContext {

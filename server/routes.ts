@@ -525,6 +525,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "All fields are required: type, purpose, recipient, details" });
       }
       
+      // Debug: Check what API key we have
+      const apiKey = process.env.OPENAI_API_KEY;
+      console.log('Draft communication - API Key status:', apiKey ? `Available (starts with: ${apiKey.substring(0, 15)}...)` : 'Not found');
+      
       const draft = await generateCommunicationDraft(
         type,
         purpose,
