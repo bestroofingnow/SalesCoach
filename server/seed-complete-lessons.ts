@@ -1619,9 +1619,9 @@ async function seedCompleteLessons() {
     await db.insert(lessons).values([
       {
         moduleId: 'res-sales-process',
-        title: 'Cold Calling Mastery',
-        content: `<h2>Cold Calling: Your Path to Unlimited Leads</h2>
-<p class="text-lg mb-6">Cold calling is the most direct path to new business. Master it to never run out of opportunities.</p>
+        title: 'SLAP Formula: Welcome and Introduction',
+        content: `<h2>Welcome to the SLAP Formula System</h2>
+<p class="text-lg mb-6">Master the proven SLAP Formula for successful door-to-door canvassing and lead generation.</p>
 
 <h3 class="text-2xl font-bold mb-4">Why Cold Calling Works</h3>
 <div class="bg-blue-50 p-6 rounded-lg mb-6">
@@ -1652,9 +1652,9 @@ async function seedCompleteLessons() {
       },
       {
         moduleId: 'res-sales-process',
-        title: 'Cold Calling Scripts and Techniques',
-        content: `<h2>Proven Scripts That Convert</h2>
-<p class="text-lg mb-6">Use these tested scripts to start conversations and book appointments.</p>
+        title: 'SLAP Formula Introduction', 
+        content: `<h2>Understanding the SLAP Formula</h2>
+<p class="text-lg mb-6">Learn the core components of the SLAP methodology for door-to-door canvassing success.</p>
 
 <h3 class="text-2xl font-bold mb-4">The General Introduction Script</h3>
 <div class="bg-blue-50 p-6 rounded-lg mb-6">
@@ -1685,9 +1685,9 @@ async function seedCompleteLessons() {
       },
       {
         moduleId: 'res-sales-process',
-        title: 'Handling Cold Call Objections',
-        content: `<h2>Turning No Into Yes</h2>
-<p class="text-lg mb-6">Objections are just requests for more information. Master these responses.</p>
+        title: 'Using SLAP For Every Scenario',
+        content: `<h2>Adapting SLAP to Every Situation</h2>
+<p class="text-lg mb-6">Learn how to apply the SLAP Formula effectively across different homeowner scenarios and responses.</p>
 
 <h3 class="text-2xl font-bold mb-4">Common Cold Call Objections</h3>
 <div class="objections space-y-4">
@@ -1726,9 +1726,9 @@ async function seedCompleteLessons() {
       },
       {
         moduleId: 'res-sales-process',
-        title: 'Cold Calling Best Practices',
-        content: `<h2>Professional Cold Calling Excellence</h2>
-<p class="text-lg mb-6">Follow these practices to maximize your success and maintain professionalism.</p>
+        title: 'SLAP Presenting Techniques',
+        content: `<h2>Mastering the "P" in SLAP</h2>
+<p class="text-lg mb-6">Learn how to present effectively to every type of homeowner response you'll encounter.</p>
 
 <h3 class="text-2xl font-bold mb-4">Pre-Call Preparation</h3>
 <div class="bg-green-50 p-6 rounded-lg mb-6">
@@ -1784,9 +1784,9 @@ async function seedCompleteLessons() {
       },
       {
         moduleId: 'res-sales-process',
-        title: 'Cold Call Follow-Up Systems',
-        content: `<h2>The Fortune is in the Follow-Up</h2>
-<p class="text-lg mb-6">Most sales happen after the 5th contact. Build a system that captures every opportunity.</p>
+        title: 'Setting Appointments for Canvassers',
+        content: `<h2>Appointment Setting for Non-Inspectors</h2>
+<p class="text-lg mb-6">Master the art of setting appointments when you can't do the inspection on the spot.</p>
 
 <h3 class="text-2xl font-bold mb-4">Follow-Up Schedule</h3>
 <div class="bg-purple-50 p-6 rounded-lg mb-6">
@@ -1825,9 +1825,9 @@ async function seedCompleteLessons() {
       },
       {
         moduleId: 'res-sales-process',
-        title: 'Tracking and Improving Cold Call Performance',
-        content: `<h2>Measure, Analyze, Improve</h2>
-<p class="text-lg mb-6">What gets measured gets improved. Track your performance to maximize results.</p>
+        title: 'Overcoming Objections and Rejection',
+        content: `<h2>Turning Rejection into Success</h2>
+<p class="text-lg mb-6">Learn proven techniques for handling objections and overcoming rejection during door-to-door canvassing.</p>
 
 <h3 class="text-2xl font-bold mb-4">Key Performance Metrics</h3>
 <div class="bg-blue-50 p-6 rounded-lg mb-6">
