@@ -19,7 +19,10 @@ import {
   Sparkles,
   Menu,
   X,
-  ArrowLeft 
+  ArrowLeft,
+  Home,
+  BookOpen,
+  Phone
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -42,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Link } from "wouter";
 
 interface CommunicationDraftForm {
   type: string;
@@ -190,21 +194,73 @@ export default function Chat() {
   };
 
   return (
-    <div className="h-screen flex relative">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="h-screen flex flex-col">
+      {/* Top Navigation Header */}
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </Link>
+            <div className="hidden sm:flex items-center gap-2">
+              <Bot className="h-5 w-5 text-primary" />
+              <h1 className="text-lg font-semibold">AI Assistant</h1>
+            </div>
+          </div>
+          
+          {/* Navigation Links */}
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
+                <Home className="h-4 w-4" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/tracks">
+              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
+                <BookOpen className="h-4 w-4" />
+                Training
+              </Button>
+            </Link>
+            <Link href="/phone-training">
+              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
+                <Phone className="h-4 w-4" />
+                Phone Training
+              </Button>
+            </Link>
+            
+            {/* Mobile Menu */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="sm:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
 
-      {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 w-80 bg-card border-r transform transition-transform duration-200 ease-in-out
-        lg:relative lg:translate-x-0 lg:w-80 xl:w-96
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      {/* Main Content Area */}
+      <div className="flex-1 flex relative overflow-hidden">
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <div className={`
+          fixed inset-y-0 left-0 z-50 w-80 bg-card border-r transform transition-transform duration-200 ease-in-out
+          lg:relative lg:translate-x-0 lg:w-80 xl:w-96
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}>
         {/* Sidebar Header */}
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
@@ -547,6 +603,7 @@ export default function Chat() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
