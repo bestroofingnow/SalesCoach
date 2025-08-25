@@ -37,6 +37,8 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
+      <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
+      <Route path="/tracks" component={() => <Redirect to="/" />} />
       <Route path="/tracks/:trackId" component={() => <ProtectedRoute component={TrainingTrack} />} />
       <Route path="/module/:moduleId" component={() => <ProtectedRoute component={TrainingModule} />} />
       <Route path="/lesson/:lessonId" component={() => <ProtectedRoute component={TrainingModule} />} />
