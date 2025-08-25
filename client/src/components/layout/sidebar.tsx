@@ -68,6 +68,15 @@ export default function Sidebar() {
             <span className="font-medium">AI Assistant</span>
           </Button>
           
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-gray-600 hover:bg-gray-50"
+            onClick={() => window.location.href = '/phone-training'}
+          >
+            <i className="fas fa-phone w-5 mr-3"></i>
+            <span className="font-medium">Phone Training</span>
+          </Button>
+          
           {/* Training Tracks */}
           {progress?.tracks?.map((track) => {
             const trackProgress = track.total > 0 ? (track.completed / track.total) * 100 : 0;

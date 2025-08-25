@@ -116,6 +116,83 @@ export const userCertifications = pgTable("user_certifications", {
   earnedAt: timestamp("earned_at").defaultNow(),
 });
 
+// Phone training specific tables
+
+// Practice scenarios for role-playing (declared first to avoid reference issues)
+export const practiceScenarios = pgTable("practice_scenarios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  prospectProfile: jsonb("prospect_profile").notNull(), // Name, situation, concerns, etc.
+  leadType: varchar("lead_type").notNull(), // storm_lead, aged_roof, referral, etc.
+  difficulty: varchar("difficulty").notNull(), // beginner, intermediate, advanced
+  expectedObjections: jsonb("expected_objections"), // Array of likely objections
+  coachingTips: text("coaching_tips"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Call recordings and practice sessions
+export const callRecordings = pgTable("call_recordings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  scenarioId: varchar("scenario_id").references(() => practiceScenarios.id),
+  audioUrl: varchar("audio_url"), // URL to stored audio file
+  duration: integer("duration"), // Duration in seconds
+  callType: varchar("call_type").notNull(), // practice, real_call, role_play
+  outcome: varchar("outcome"), // appointment_set, no_interest, callback, etc.
+  score: integer("score"), // Overall call score (1-30 based on rubric)
+  notes: text("notes"), // User or coach notes
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Performance metrics tracking
+export const performanceMetrics = pgTable("performance_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  date: timestamp("date").notNull(),
+  totalDials: integer("total_dials").default(0),
+  totalContacts: integer("total_contacts").default(0),
+  appointmentsSet: integer("appointments_set").default(0),
+  contactRate: integer("contact_rate"), // Percentage * 100 (e.g., 25% = 2500)
+  appointmentRate: integer("appointment_rate"), // Percentage * 100
+  averageCallDuration: integer("average_call_duration"), // Seconds
+  averageCallScore: integer("average_call_score"), // 1-30 scale
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Script library and templates
+export const scriptLibrary = pgTable("script_library", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  category: varchar("category").notNull(), // opening, objection_response, closing, etc.
+  leadType: varchar("lead_type"), // storm_lead, aged_roof, all_leads, etc.
+  scriptContent: text("script_content").notNull(),
+  tags: jsonb("tags"), // Array of searchable tags
+  difficulty: varchar("difficulty").default("beginner"), // beginner, intermediate, advanced
+  successRate: integer("success_rate"), // Percentage * 100 based on usage
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Call scoring rubric details
+export const callScoringRubric = pgTable("call_scoring_rubric", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  callRecordingId: varchar("call_recording_id").references(() => callRecordings.id).notNull(),
+  openingRapport: integer("opening_rapport"), // 1-5 score
+  reasonForCalling: integer("reason_for_calling"), // 1-5 score
+  qualifyingQuestions: integer("qualifying_questions"), // 1-5 score
+  objectionHandling: integer("objection_handling"), // 1-5 score
+  closing: integer("closing"), // 1-5 score
+  professionalism: integer("professionalism"), // 1-5 score
+  totalScore: integer("total_score"), // Sum of above (6-30)
+  feedback: text("feedback"), // Detailed feedback and improvement suggestions
+  scoredBy: varchar("scored_by").references(() => users.id), // Coach or self-scored
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const trackRelations = relations(trainingTracks, ({ many }) => ({
   modules: many(trainingModules),
@@ -141,6 +218,54 @@ export const lessonRelations = relations(lessons, ({ one, many }) => ({
 export const userRelations = relations(users, ({ many }) => ({
   progress: many(userProgress),
   certifications: many(userCertifications),
+  callRecordings: many(callRecordings),
+  performanceMetrics: many(performanceMetrics),
+  scriptLibrary: many(scriptLibrary),
+}));
+
+// Phone training relations
+export const practiceScenarioRelations = relations(practiceScenarios, ({ many }) => ({
+  callRecordings: many(callRecordings),
+}));
+
+export const callRecordingRelations = relations(callRecordings, ({ one }) => ({
+  user: one(users, {
+    fields: [callRecordings.userId],
+    references: [users.id],
+  }),
+  scenario: one(practiceScenarios, {
+    fields: [callRecordings.scenarioId],
+    references: [practiceScenarios.id],
+  }),
+  rubric: one(callScoringRubric, {
+    fields: [callRecordings.id],
+    references: [callScoringRubric.callRecordingId],
+  }),
+}));
+
+export const performanceMetricsRelations = relations(performanceMetrics, ({ one }) => ({
+  user: one(users, {
+    fields: [performanceMetrics.userId],
+    references: [users.id],
+  }),
+}));
+
+export const scriptLibraryRelations = relations(scriptLibrary, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [scriptLibrary.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const callScoringRubricRelations = relations(callScoringRubric, ({ one }) => ({
+  callRecording: one(callRecordings, {
+    fields: [callScoringRubric.callRecordingId],
+    references: [callRecordings.id],
+  }),
+  scoredBy: one(users, {
+    fields: [callScoringRubric.scoredBy],
+    references: [users.id],
+  }),
 }));
 
 // Insert schemas
@@ -174,6 +299,33 @@ export const insertQuizResponseSchema = z.object({
   selectedAnswer: z.number(),
 });
 
+// Phone training insert schemas
+export const insertPracticeScenarioSchema = createInsertSchema(practiceScenarios).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCallRecordingSchema = createInsertSchema(callRecordings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPerformanceMetricsSchema = createInsertSchema(performanceMetrics).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertScriptLibrarySchema = createInsertSchema(scriptLibrary).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCallScoringRubricSchema = createInsertSchema(callScoringRubric).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -187,6 +339,18 @@ export type QuizQuestion = typeof quizQuestions.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;
 export type Certification = typeof certifications.$inferSelect;
 export type UserCertification = typeof userCertifications.$inferSelect;
+
+// Phone training types
+export type PracticeScenario = typeof practiceScenarios.$inferSelect;
+export type CallRecording = typeof callRecordings.$inferSelect;
+export type PerformanceMetrics = typeof performanceMetrics.$inferSelect;
+export type ScriptLibrary = typeof scriptLibrary.$inferSelect;
+export type CallScoringRubric = typeof callScoringRubric.$inferSelect;
+export type InsertPracticeScenario = z.infer<typeof insertPracticeScenarioSchema>;
+export type InsertCallRecording = z.infer<typeof insertCallRecordingSchema>;
+export type InsertPerformanceMetrics = z.infer<typeof insertPerformanceMetricsSchema>;
+export type InsertScriptLibrary = z.infer<typeof insertScriptLibrarySchema>;
+export type InsertCallScoringRubric = z.infer<typeof insertCallScoringRubricSchema>;
 // Chat system tables
 export const chatConversations = pgTable("chat_conversations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
