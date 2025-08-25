@@ -29,51 +29,62 @@ export default function Sidebar() {
     (progress.overall.completed / progress.overall.total) * 100 : 0;
 
   return (
-    <aside className="w-64 bg-white shadow-lg h-screen sticky top-0 overflow-y-auto">
+    <aside className="w-64 bg-white shadow-xl h-screen sticky top-0 overflow-y-auto border-r border-slate-200">
       <div className="p-6">
-        {/* Overall Progress */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 mb-6 text-white">
-          <h3 className="font-semibold mb-2">Overall Progress</h3>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm opacity-90">{Math.round(overallProgress)}% Complete</span>
-            <span className="text-sm opacity-90">
-              {progress?.overall.completed || 0}/{progress?.overall.total || 0} Modules
-            </span>
+        {/* Enhanced Overall Progress */}
+        <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl p-5 mb-6 text-white shadow-lg">
+          <div className="flex items-center mb-3">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+              <i className="fas fa-chart-line text-sm"></i>
+            </div>
+            <h3 className="font-semibold text-lg">Your Progress</h3>
           </div>
-          <div className="w-full bg-white/20 rounded-full h-2">
+          <div className="mb-4">
+            <div className="text-3xl font-bold mb-1">{Math.round(overallProgress)}%</div>
+            <div className="text-sm opacity-90">
+              {progress?.overall.completed || 0} of {progress?.overall.total || 0} modules completed
+            </div>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-3">
             <div 
-              className="bg-white rounded-full h-2 transition-all duration-300" 
+              className="bg-white rounded-full h-3 transition-all duration-500 shadow-sm" 
               style={{ width: `${overallProgress}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="space-y-2">
+        {/* Enhanced Navigation Menu */}
+        <nav className="space-y-3 mb-6">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 mb-2">Main Menu</div>
+          
           <Button 
             variant="ghost" 
-            className="w-full justify-start bg-blue-500 text-white hover:bg-blue-600"
+            className="w-full justify-start bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-xl shadow-md"
             onClick={() => window.location.href = '/'}
           >
-            <i className="fas fa-tachometer-alt w-5 mr-3"></i>
+            <i className="fas fa-tachometer-alt w-5 mr-3 text-lg"></i>
             <span className="font-medium">Dashboard</span>
           </Button>
           
           <Button 
             variant="ghost" 
-            className="w-full justify-start text-gray-600 hover:bg-gray-50"
+            className="w-full justify-start text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all duration-200 group"
             onClick={() => window.location.href = '/chat'}
           >
-            <i className="fas fa-comments w-5 mr-3"></i>
+            <div className="w-9 h-9 mr-3 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+              <i className="fas fa-robot text-green-600 text-sm"></i>
+            </div>
             <span className="font-medium">AI Assistant</span>
           </Button>
           
           <Button 
             variant="ghost" 
-            className="w-full justify-start text-gray-600 hover:bg-gray-50"
+            className="w-full justify-start text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl transition-all duration-200 group"
             onClick={() => window.location.href = '/phone-training'}
           >
-            <i className="fas fa-phone w-5 mr-3"></i>
+            <div className="w-9 h-9 mr-3 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+              <i className="fas fa-phone text-purple-600 text-sm"></i>
+            </div>
             <span className="font-medium">Phone Training</span>
           </Button>
           

@@ -54,7 +54,7 @@ Respond with just the hint text, no additional formatting.`;
         { role: "system", content: "You are a supportive roofing training assistant who provides helpful hints." },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7,
+      // temperature: 1.0, // Using default temperature for GPT-5
       max_completion_tokens: 150
     });
 
@@ -89,7 +89,7 @@ Just provide the hint text.`;
         { role: "system", content: "You are a supportive quiz assistant." },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7,
+      // temperature: 1.0, // Using default temperature for GPT-5
       max_completion_tokens: 100
     });
 
@@ -121,7 +121,7 @@ Just provide the explanation.`;
         { role: "system", content: "You are a roofing education expert who explains concepts simply." },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7,
+      // temperature: 1.0, // Using default temperature for GPT-5
       max_completion_tokens: 200
     });
 

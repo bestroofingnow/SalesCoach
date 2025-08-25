@@ -160,7 +160,7 @@ export async function generateChatResponse(
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages,
       max_completion_tokens: 1000,
-      temperature: 0.7,
+      // temperature: 1.0, // Using default temperature for GPT-5
     });
 
     return response.choices[0].message.content || "I apologize, but I'm unable to generate a response at this time. Please try again.";

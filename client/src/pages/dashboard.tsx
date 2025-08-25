@@ -61,60 +61,102 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <Navbar />
       
       <div className="flex">
         <Sidebar />
         
         <main className="flex-1 overflow-y-auto">
-          <div className="p-8">
-            {/* Dashboard Header */}
+          <div className="p-4 md:p-8">
+            {/* Enhanced Dashboard Header */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                    Welcome back, {user?.firstName || 'Trainee'}! 👋
+                  </h1>
+                  <p className="text-slate-600 text-lg max-w-2xl">
+                    Continue your training journey and master all aspects of roofing excellence. Track your progress and achieve your goals.
+                  </p>
+                </div>
+                <div className="mt-4 md:mt-0 flex gap-3">
+                  <Button 
+                    onClick={() => window.location.href = '/phone-training'}
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <i className="fas fa-phone mr-2"></i>
+                    Phone Training
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.location.href = '/chat'}
+                    className="border-2 border-blue-200 hover:bg-blue-50 transition-all duration-200"
+                  >
+                    <i className="fas fa-robot mr-2"></i>
+                    AI Assistant
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Quick Stats */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome back, {user?.firstName || 'Trainee'}!
-              </h1>
-              <p className="text-gray-600">
-                Continue your training journey and master all aspects of roofing excellence.
-              </p>
+              <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center">
+                <i className="fas fa-chart-line mr-2 text-blue-500"></i>
+                Your Progress Overview
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <ProgressCard
+                  title="Residential"
+                  completed={stats?.residential.completed || 0}
+                  total={stats?.residential.total || 0}
+                  color="blue"
+                  icon="fas fa-home"
+                />
+                <ProgressCard
+                  title="Commercial"
+                  completed={stats?.commercial.completed || 0}
+                  total={stats?.commercial.total || 0}
+                  color="orange"
+                  icon="fas fa-building"
+                />
+                <ProgressCard
+                  title="Restoration"
+                  completed={stats?.restoration.completed || 0}
+                  total={stats?.restoration.total || 0}
+                  color="purple"
+                  icon="fas fa-cloud-rain"
+                />
+                <ProgressCard
+                  title="Certifications"
+                  completed={stats?.certifications.earned || 0}
+                  total={stats?.certifications.total || 0}
+                  color="green"
+                  icon="fas fa-certificate"
+                />
+              </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <ProgressCard
-                title="Residential"
-                completed={stats?.residential.completed || 0}
-                total={stats?.residential.total || 0}
-                color="blue"
-                icon="fas fa-home"
-              />
-              <ProgressCard
-                title="Commercial"
-                completed={stats?.commercial.completed || 0}
-                total={stats?.commercial.total || 0}
-                color="orange"
-                icon="fas fa-building"
-              />
-              <ProgressCard
-                title="Restoration"
-                completed={stats?.restoration.completed || 0}
-                total={stats?.restoration.total || 0}
-                color="purple"
-                icon="fas fa-cloud-rain"
-              />
-              <ProgressCard
-                title="Certifications"
-                completed={stats?.certifications.earned || 0}
-                total={stats?.certifications.total || 0}
-                color="green"
-                icon="fas fa-certificate"
-              />
-            </div>
-
-            {/* Learning Tracks */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-              {/* Residential Track */}
-              <Card className="overflow-hidden">
+            {/* Enhanced Learning Tracks */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-slate-800 flex items-center">
+                  <i className="fas fa-graduation-cap mr-2 text-blue-500"></i>
+                  Training Tracks
+                </h2>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  <i className="fas fa-eye mr-2"></i>
+                  View All
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Residential Track */}
+                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
                 <img 
                   src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&w=400&h=200&fit=crop" 
                   alt="Modern residential home with shingle roof" 
@@ -238,6 +280,7 @@ export default function Dashboard() {
                   </Button>
                 </CardContent>
               </Card>
+              </div>
             </div>
 
             {/* Recent Activity & Quick Actions */}
