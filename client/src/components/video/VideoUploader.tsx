@@ -22,10 +22,11 @@ export function VideoUploader({ onVideoUploaded, isOpen, onClose, lessonId }: Vi
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
-      if (!file.type.startsWith('video/')) {
+      const validTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/ogg', 'video/avi'];
+      if (!file.type.startsWith('video/') && !validTypes.includes(file.type)) {
         toast({
           title: "Invalid File Type",
-          description: "Please select a video file",
+          description: "Please select a valid video file (MP4, WebM, MOV, AVI, etc.)",
           variant: "destructive",
         });
         return;
@@ -145,11 +146,11 @@ export function VideoUploader({ onVideoUploaded, isOpen, onClose, lessonId }: Vi
               <Video className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Select Video File</h3>
               <p className="text-sm text-gray-500 mb-4">
-                Choose a video file to upload (MP4, MOV, AVI, etc.)
+                Choose a video file to upload (MP4, WebM, MOV, AVI, etc.)
               </p>
               <input
                 type="file"
-                accept="video/*"
+                accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,video/*"
                 onChange={handleFileSelect}
                 className="hidden"
                 id="video-upload"

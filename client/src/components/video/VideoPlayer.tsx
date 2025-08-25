@@ -140,7 +140,11 @@ export function VideoPlayer({ videoUrl, title, onProgress, onComplete }: VideoPl
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         poster="/api/placeholder-video-thumbnail"
+        controls={false}
       >
+        <source src={videoUrl} type="video/mp4" />
+        <source src={videoUrl} type="video/webm" />
+        <source src={videoUrl} type="video/ogg" />
         Your browser does not support the video tag.
       </video>
 
