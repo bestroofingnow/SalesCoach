@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Upload, Video } from "lucide-react";
+import { VideoPlayer } from "@/components/video/VideoPlayer";
+import { VideoUploader } from "@/components/video/VideoUploader";
 
 interface Lesson {
   id: string;
@@ -16,12 +19,46 @@ interface Lesson {
 
 interface LessonContentProps {
   lesson: Lesson;
+  isAdmin?: boolean;
 }
 
-export default function LessonContent({ lesson }: LessonContentProps) {
+export default function LessonContent({ lesson, isAdmin = false }: LessonContentProps) {
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showVideoUploader, setShowVideoUploader] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get current user to check admin status
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false
+  });
+
+  const isUserAdmin = (user as any)?.role === 'admin';
+
+  const updateVideoMutation = useMutation({
+    mutationFn: async ({ videoUrl }: { videoUrl: string }) => {
+      await apiRequest('PUT', `/api/lessons/${lesson.id}/video`, {
+        videoUrl
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/lessons/${lesson.id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/modules'] });
+      toast({
+        title: "Video Updated!",
+        description: "The lesson video has been updated successfully.",
+      });
+      setShowVideoUploader(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update lesson video. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const markCompleteMutation = useMutation({
     mutationFn: async () => {
@@ -50,20 +87,55 @@ export default function LessonContent({ lesson }: LessonContentProps) {
   return (
     <div className="space-y-6">
       {/* Video Section */}
-      {lesson.videoUrl && (
+      {lesson.videoUrl ? (
         <Card>
-          <CardContent className="p-0">
-            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
-              <iframe
-                src={lesson.videoUrl}
-                className="w-full h-full"
-                allowFullScreen
-                title={lesson.title}
-              />
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Video className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-semibold">Training Video</h3>
+              </div>
+              {isUserAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowVideoUploader(true)}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Replace Video
+                </Button>
+              )}
             </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <VideoPlayer
+              videoUrl={lesson.videoUrl.startsWith('/videos/') 
+                ? `/api${lesson.videoUrl}` 
+                : lesson.videoUrl}
+              title={lesson.title}
+              onComplete={() => {
+                if (!isCompleted) {
+                  markCompleteMutation.mutate();
+                }
+              }}
+            />
           </CardContent>
         </Card>
-      )}
+      ) : isUserAdmin ? (
+        <Card className="border-dashed border-2 border-gray-300">
+          <CardContent className="p-8 text-center">
+            <Video className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Video Added</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Upload a training video for this lesson to enhance the learning experience.
+            </p>
+            <Button onClick={() => setShowVideoUploader(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Add Video
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Content Section */}
       <Card>
@@ -104,6 +176,16 @@ export default function LessonContent({ lesson }: LessonContentProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Video Uploader Modal */}
+      <VideoUploader
+        isOpen={showVideoUploader}
+        onClose={() => setShowVideoUploader(false)}
+        onVideoUploaded={(videoUrl) => {
+          updateVideoMutation.mutate({ videoUrl });
+        }}
+        lessonId={lesson.id}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { generateContextualHint, generateQuizHint, explainConcept } from "./ai-h
 import { generateChatResponse, generateCommunicationDraft } from "./chat-service";
 import { authenticateUser, authMiddleware, adminMiddleware, hashPassword } from "./auth";
 import bcrypt from "bcryptjs";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize database on startup
@@ -570,6 +571,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating conversation title:", error);
       res.status(500).json({ message: "Failed to update conversation title" });
+    }
+  });
+
+  // Video upload and serving endpoints
+  app.post('/api/videos/upload', authMiddleware, async (req: any, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getVideoUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting video upload URL:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get('/api/videos/:videoId', async (req, res) => {
+    try {
+      const { videoId } = req.params;
+      const objectStorageService = new ObjectStorageService();
+      const videoFile = await objectStorageService.getVideoFile(`/videos/${videoId}`);
+      objectStorageService.downloadObject(videoFile, res);
+    } catch (error) {
+      console.error("Error serving video:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Update lesson with video URL
+  app.put('/api/lessons/:id/video', authMiddleware, adminMiddleware, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { videoUrl } = req.body;
+
+      if (!videoUrl) {
+        return res.status(400).json({ message: "videoUrl is required" });
+      }
+
+      const objectStorageService = new ObjectStorageService();
+      const normalizedVideoPath = objectStorageService.normalizeVideoPath(videoUrl);
+
+      // Update lesson with video URL
+      const lesson = await storage.updateLessonVideo(id, normalizedVideoPath);
+      
+      if (!lesson) {
+        return res.status(404).json({ message: "Lesson not found" });
+      }
+
+      res.json(lesson);
+    } catch (error) {
+      console.error("Error updating lesson video:", error);
+      res.status(500).json({ message: "Failed to update lesson video" });
     }
   });
 

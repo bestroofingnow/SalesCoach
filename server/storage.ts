@@ -41,6 +41,7 @@ export interface IStorage {
   getTrainingModules(trackId: string): Promise<TrainingModule[]>;
   getLessons(moduleId: string): Promise<Lesson[]>;
   getLesson(lessonId: string): Promise<Lesson | undefined>;
+  updateLessonVideo(lessonId: string, videoUrl: string): Promise<Lesson | undefined>;
   
   // Progress methods
   getUserProgress(userId: string): Promise<UserProgress[]>;
@@ -147,6 +148,15 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(lessons)
       .where(eq(lessons.id, lessonId));
+    return lesson || undefined;
+  }
+
+  async updateLessonVideo(lessonId: string, videoUrl: string): Promise<Lesson | undefined> {
+    const [lesson] = await db
+      .update(lessons)
+      .set({ videoUrl })
+      .where(eq(lessons.id, lessonId))
+      .returning();
     return lesson || undefined;
   }
 
