@@ -33,6 +33,11 @@ export default function Dashboard() {
     retry: false,
   });
 
+  const { data: tracks } = useQuery({
+    queryKey: ["/api/tracks"],
+    retry: false,
+  });
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
@@ -190,7 +195,7 @@ export default function Dashboard() {
 
                   <Button 
                     className="w-full bg-blue-500 hover:bg-blue-600"
-                    onClick={() => setLocation("/tracks/19f30d96-6d6e-4126-b116-17a387991081")}
+                    onClick={() => setLocation("/tracks/residential-roofing")}
                   >
                     Continue Learning
                   </Button>
@@ -232,7 +237,7 @@ export default function Dashboard() {
 
                   <Button 
                     className="w-full bg-orange-500 hover:bg-orange-600"
-                    onClick={() => setLocation("/tracks/dd1389e4-df7c-4475-8bc2-872c2609bf7e")}
+                    onClick={() => setLocation("/tracks/commercial-roofing")}
                   >
                     Continue Learning
                   </Button>
@@ -274,7 +279,7 @@ export default function Dashboard() {
 
                   <Button 
                     className="w-full bg-purple-500 hover:bg-purple-600"
-                    onClick={() => setLocation("/tracks/9329d6b1-0f45-46b1-a42d-60b5068c985b")}
+                    onClick={() => setLocation("/tracks/restoration-insurance")}
                   >
                     Continue Learning
                   </Button>
