@@ -132,7 +132,7 @@ export default function Sidebar() {
                 </Button>
                 
                 {/* Track Modules - Hidden by Default, Show on Hover */}
-                <div className="absolute left-full top-0 ml-2 w-64 bg-white shadow-xl rounded-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="absolute right-0 top-0 mr-2 w-64 bg-white shadow-xl rounded-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform translate-x-full">
                   <div className="mb-2">
                     <h4 className="font-semibold text-slate-800 text-sm">{track.name} Modules</h4>
                     <p className="text-xs text-slate-500">{track.completed} of {track.total} completed</p>
