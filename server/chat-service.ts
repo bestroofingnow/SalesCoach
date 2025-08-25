@@ -159,7 +159,7 @@ export async function generateChatResponse(
     const response = await client.chat.completions.create({
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages,
-      max_tokens: 1000,
+      max_completion_tokens: 1000,
       temperature: 0.7,
     });
 
@@ -205,7 +205,7 @@ Include our company name "${COMPANY_INFO.name}" and location "${COMPANY_INFO.loc
         { role: "system", content: buildSystemPrompt(context) },
         { role: "user", content: communicationPrompt }
       ],
-      max_tokens: 800,
+      max_completion_tokens: 800,
       temperature: 0.5, // Lower temperature for more consistent professional communications
     });
 

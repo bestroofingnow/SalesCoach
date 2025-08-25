@@ -55,7 +55,7 @@ Respond with just the hint text, no additional formatting.`;
         { role: "user", content: prompt }
       ],
       temperature: 0.7,
-      max_tokens: 150
+      max_completion_tokens: 150
     });
 
     return response.choices[0].message.content || "Think about what you've learned so far and how it applies to real roofing situations.";
@@ -90,7 +90,7 @@ Just provide the hint text.`;
         { role: "user", content: prompt }
       ],
       temperature: 0.7,
-      max_tokens: 100
+      max_completion_tokens: 100
     });
 
     return response.choices[0].message.content || "Think carefully about each option and what you've learned.";
@@ -122,7 +122,7 @@ Just provide the explanation.`;
         { role: "user", content: prompt }
       ],
       temperature: 0.7,
-      max_tokens: 200
+      max_completion_tokens: 200
     });
 
     return response.choices[0].message.content || "This concept relates to important roofing practices. Let me know what specific part you'd like to understand better.";
