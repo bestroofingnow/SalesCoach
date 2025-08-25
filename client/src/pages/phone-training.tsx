@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
+import MobileNav from "@/components/layout/mobile-nav";
 import PracticeCallRecorder from "@/components/phone-training/practice-call-recorder";
 import ScriptLibrary from "@/components/phone-training/script-library";
 import PerformanceDashboard from "@/components/phone-training/performance-dashboard";
@@ -46,35 +47,38 @@ export default function PhoneTraining() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <MobileNav />
+      <div className="hidden lg:block">
+        <Navbar />
+      </div>
       
       <div className="flex">
         <Sidebar />
         
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-8">
+        <main className="flex-1 overflow-y-auto pt-16 lg:pt-0">
+          <div className="p-4 sm:p-6 md:p-8">
             {/* Page Header */}
-            <div className="mb-8">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-16 h-16 bg-teal-100 rounded-lg flex items-center justify-center">
-                  <i className="fas fa-phone text-teal-500 text-2xl"></i>
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-4 mb-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-100 rounded-lg flex items-center justify-center mb-3 sm:mb-0">
+                  <i className="fas fa-phone text-teal-500 text-xl sm:text-2xl"></i>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Phone Training</h1>
-                  <p className="text-gray-600">Master cold calling and appointment setting skills</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Phone Training</h1>
+                  <p className="text-sm sm:text-base text-gray-600">Master cold calling and appointment setting skills</p>
                 </div>
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
                 <Card>
-                  <CardContent className="p-4">
+                  <CardContent className="p-3 sm:p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600">Total Calls</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats?.totalCalls || 0}</p>
+                        <p className="text-xs sm:text-sm text-gray-600">Total Calls</p>
+                        <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats?.totalCalls || 0}</p>
                       </div>
-                      <i className="fas fa-phone-volume text-teal-500 text-xl"></i>
+                      <i className="fas fa-phone-volume text-teal-500 text-lg sm:text-xl"></i>
                     </div>
                   </CardContent>
                 </Card>
@@ -83,10 +87,10 @@ export default function PhoneTraining() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600">Appointments Set</p>
-                        <p className="text-2xl font-bold text-green-600">{stats?.appointmentsSet || 0}</p>
+                        <p className="text-xs sm:text-sm text-gray-600">Appointments Set</p>
+                        <p className="text-lg sm:text-2xl font-bold text-green-600">{stats?.appointmentsSet || 0}</p>
                       </div>
-                      <i className="fas fa-calendar-check text-green-500 text-xl"></i>
+                      <i className="fas fa-calendar-check text-green-500 text-lg sm:text-xl"></i>
                     </div>
                   </CardContent>
                 </Card>
@@ -131,7 +135,7 @@ export default function PhoneTraining() {
 
             {/* Main Content Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
                 <TabsTrigger value="overview" data-testid="tab-overview">
                   <i className="fas fa-chart-line mr-2"></i>
                   Overview

@@ -29,7 +29,7 @@ export default function Sidebar() {
     (progress.overall.completed / progress.overall.total) * 100 : 0;
 
   return (
-    <aside className="w-64 bg-white shadow-xl h-screen sticky top-0 overflow-y-auto border-r border-slate-200">
+    <aside className="hidden lg:block w-64 bg-white shadow-xl h-screen sticky top-0 overflow-y-auto border-r border-slate-200">
       <div className="p-6">
         {/* Enhanced Overall Progress */}
         <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl p-5 mb-6 text-white shadow-lg">

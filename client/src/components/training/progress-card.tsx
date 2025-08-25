@@ -24,14 +24,14 @@ export default function ProgressCard({ title, completed, total, color, icon }: P
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
+    <div className="bg-white rounded-xl p-4 sm:p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center">
-        <div className={`w-12 h-12 ${colorClasses[color]} rounded-lg flex items-center justify-center`}>
-          <i className={`${icon} text-xl`}></i>
+        <div className={`w-10 h-10 sm:w-12 sm:h-12 ${colorClasses[color]} rounded-lg flex items-center justify-center flex-shrink-0`}>
+          <i className={`${icon} text-lg sm:text-xl`}></i>
         </div>
-        <div className="ml-4">
-          <p className="text-sm text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{completed}/{total}</p>
+        <div className="ml-3 sm:ml-4">
+          <p className="text-xs sm:text-sm text-gray-600">{title}</p>
+          <p className="text-xl sm:text-2xl font-bold text-gray-900">{completed}/{total}</p>
         </div>
       </div>
       <div className="mt-4">

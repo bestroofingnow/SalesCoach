@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
+import MobileNav from "@/components/layout/mobile-nav";
 import ProgressCard from "@/components/training/progress-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,39 +68,42 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <Navbar />
+      <MobileNav />
+      <div className="hidden lg:block">
+        <Navbar />
+      </div>
       
       <div className="flex">
         <Sidebar />
         
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pt-16 lg:pt-0">
           <div className="p-4 md:p-8">
             {/* Enhanced Dashboard Header */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 md:p-8 mb-8">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div className="mb-4 lg:mb-0">
+                  <h1 className="text-xl sm:text-2xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
                     Welcome back, {user?.firstName || 'Trainee'}! 👋
                   </h1>
-                  <p className="text-slate-600 text-lg max-w-2xl">
+                  <p className="text-slate-600 text-sm sm:text-base md:text-lg max-w-2xl">
                     Continue your training journey and master all aspects of roofing excellence. Track your progress and achieve your goals.
                   </p>
                 </div>
-                <div className="mt-4 md:mt-0 flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <Button 
                     onClick={() => window.location.href = '/phone-training'}
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
                   >
                     <i className="fas fa-phone mr-2"></i>
-                    Phone Training
+                    <span className="sm:inline">Phone Training</span>
                   </Button>
                   <Button 
                     variant="outline"
                     onClick={() => window.location.href = '/chat'}
-                    className="border-2 border-blue-200 hover:bg-blue-50 transition-all duration-200"
+                    className="border-2 border-blue-200 hover:bg-blue-50 transition-all duration-200 w-full sm:w-auto"
                   >
                     <i className="fas fa-robot mr-2"></i>
-                    AI Assistant
+                    <span className="sm:inline">AI Assistant</span>
                   </Button>
                 </div>
               </div>
@@ -111,7 +115,7 @@ export default function Dashboard() {
                 <i className="fas fa-chart-line mr-2 text-blue-500"></i>
                 Your Progress Overview
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 <ProgressCard
                   title="Residential"
                   completed={stats?.residential.completed || 0}
@@ -159,9 +163,9 @@ export default function Dashboard() {
                   View All
                 </Button>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Residential Track */}
-                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
+                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-md hover:shadow-lg">
                 <img 
                   src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&w=400&h=200&fit=crop" 
                   alt="Modern residential home with shingle roof" 
