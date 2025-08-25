@@ -206,7 +206,7 @@ Include our company name "${COMPANY_INFO.name}" and location "${COMPANY_INFO.loc
         { role: "user", content: communicationPrompt }
       ],
       max_completion_tokens: 800,
-      temperature: 0.5, // Lower temperature for more consistent professional communications
+      // temperature: 1.0, // Using default temperature for GPT-5 (only default is supported)
     });
 
     return response.choices[0].message.content || "Unable to generate communication draft at this time.";
