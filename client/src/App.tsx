@@ -15,6 +15,7 @@ import Quiz from "@/pages/quiz";
 import Admin from "@/pages/admin";
 import Chat from "@/pages/chat";
 import PhoneTraining from "@/pages/phone-training";
+import Profile from "@/pages/profile";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/quiz/:type/:id" component={() => <ProtectedRoute component={Quiz} />} />
       <Route path="/chat" component={() => <ProtectedRoute component={Chat} />} />
       <Route path="/phone-training" component={() => <ProtectedRoute component={PhoneTraining} />} />
+      <Route path="/profile" component={() => <ProtectedRoute component={Profile} />} />
       <Route path="/admin" component={() => <ProtectedRoute component={Admin} />} />
       <Route component={NotFound} />
     </Switch>

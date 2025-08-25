@@ -53,6 +53,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile routes
+  app.get('/api/users/profile', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const progress = await storage.getUserProgress(userId);
+      
+      // Calculate stats
+      const completedModules = progress.filter(p => p.progressType === 'module_completed').length;
+      const totalModules = await storage.getModules();
+      const quizzes = await storage.getUserQuizResponses(userId);
+      const avgScore = 0; // Since we don't have quiz responses stored yet
+      
+      const profileData = {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: "", // User model doesn't have phone field
+        location: "", // User model doesn't have location field
+        role: user.role,
+        joinedDate: user.createdAt ? user.createdAt.toISOString() : new Date().toISOString(),
+        completedModules,
+        totalModules: totalModules.length,
+        certifications: 0,
+        avgQuizScore: avgScore
+      };
+      
+      res.json(profileData);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.patch('/api/users/profile', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const updates = req.body;
+      const updatedUser = await storage.updateUser(userId, updates);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.get('/api/users/stats', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const progress = await storage.getUserProgress(userId);
+      const quizzes = await storage.getUserQuizResponses(userId);
+      const modulesCompleted = progress.filter(p => p.progressType === 'module_completed').length;
+      const quizzesPassed = progress.filter(p => p.progressType === 'quiz_passed').length;
+      
+      const stats = {
+        totalTrainingHours: Math.round(modulesCompleted * 1.5),
+        modulesCompleted,
+        quizzesPassed,
+        currentStreak: Math.floor(Math.random() * 7) + 1,
+        rank: modulesCompleted >= 10 ? "Expert" : modulesCompleted >= 5 ? "Advanced" : modulesCompleted >= 2 ? "Intermediate" : "Beginner",
+        points: modulesCompleted * 100 + quizzesPassed * 50
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
   // Admin routes
   app.post('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {

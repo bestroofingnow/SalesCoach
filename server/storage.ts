@@ -30,9 +30,10 @@ import { eq, and, count, sql, inArray } from "drizzle-orm";
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(userData: Omit<UpsertUser, 'id'>): Promise<User>;
-  updateUser(id: string, userData: Partial<User>): Promise<User>;
+  updateUser(id: string, userData: Partial<User>): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   
@@ -50,6 +51,10 @@ export interface IStorage {
   // Quiz methods
   getQuizQuestions(id: string, type: 'lesson' | 'module'): Promise<QuizQuestion[]>;
   submitQuizResponses(userId: string, responses: QuizResponse[], quizType: string, quizId: string): Promise<{ score: number; passed: boolean }>;
+  getUserQuizResponses(userId: string): Promise<QuizResponse[]>;
+  
+  // Module methods
+  getModules(): Promise<TrainingModule[]>;
   
   // Certification methods
   getUserCertifications(userId: string): Promise<UserCertification[]>;
@@ -71,6 +76,11 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserById(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;
@@ -84,7 +94,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: string, userData: Partial<User>): Promise<User> {
+  async updateUser(id: string, userData: Partial<User>): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({
@@ -93,7 +103,7 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(users.id, id))
       .returning();
-    return user;
+    return user || undefined;
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -245,6 +255,16 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(userCertifications)
       .where(eq(userCertifications.userId, userId));
+  }
+
+  async getUserQuizResponses(userId: string): Promise<QuizResponse[]> {
+    // Since we don't have a dedicated quiz responses table, we'll return an empty array for now
+    // In a real app, you'd have a table to store quiz responses
+    return [];
+  }
+
+  async getModules(): Promise<TrainingModule[]> {
+    return await db.select().from(trainingModules);
   }
 
   async getDashboardStats(userId: string): Promise<any> {
