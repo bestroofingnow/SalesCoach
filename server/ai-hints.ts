@@ -1,13 +1,13 @@
 import OpenAI from 'openai';
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 let openai: OpenAI | null = null;
 
 function getOpenAIClient(): OpenAI {
   if (!openai) {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPEN_AI_BRN_ASST;
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY environment variable is required for AI features');
+      throw new Error('OPEN_AI_BRN_ASST environment variable is required for AI features');
     }
     openai = new OpenAI({ apiKey });
   }
@@ -49,7 +49,7 @@ Respond with just the hint text, no additional formatting.`;
 
     const client = getOpenAIClient();
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         { role: "system", content: "You are a supportive roofing training assistant who provides helpful hints." },
         { role: "user", content: prompt }
@@ -84,7 +84,7 @@ Just provide the hint text.`;
 
     const client = getOpenAIClient();
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         { role: "system", content: "You are a supportive quiz assistant." },
         { role: "user", content: prompt }
@@ -116,7 +116,7 @@ Just provide the explanation.`;
 
     const client = getOpenAIClient();
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         { role: "system", content: "You are a roofing education expert who explains concepts simply." },
         { role: "user", content: prompt }

@@ -2,11 +2,11 @@ import OpenAI from "openai";
 import { storage } from "./storage";
 
 function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.OPEN_AI_BRN_ASST;
   console.log('OpenAI API Key status:', apiKey ? `Available (starts with: ${apiKey.substring(0, 15)}...)` : 'Not found');
   
   if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is required for chat features');
+    throw new Error('OPEN_AI_BRN_ASST environment variable is required for chat features');
   }
   
   // Always create a fresh client to ensure we get the latest API key
@@ -105,12 +105,13 @@ You help employees, trainees, and staff with:
 5. Assisting with customer service scenarios and sales situations
 
 COMMUNICATION STYLE:
-- Professional but friendly
-- Clear and helpful
-- Reflect our company values in all responses
-- Use industry-appropriate terminology
+- Professional but friendly and conversational
+- Clear, helpful, and easy to understand
+- Use simple language that anyone can understand
+- Avoid jargon unless necessary, and explain technical terms
 - Always prioritize safety and quality
-- When drafting communications, ensure they sound professional and represent our company well
+- Be encouraging and supportive in your responses
+- When drafting communications, ensure they sound professional but approachable
 
 IMPORTANT GUIDELINES:
 - Always reference relevant training content when available
@@ -156,7 +157,7 @@ export async function generateChatResponse(
     messages.push({ role: "user", content: enhancedMessage });
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages,
       max_tokens: 1000,
       temperature: 0.7,
@@ -199,7 +200,7 @@ Make it specific to the roofing industry and our services: ${COMPANY_INFO.servic
 Include our company name "${COMPANY_INFO.name}" and location "${COMPANY_INFO.location}" where appropriate.`;
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages: [
         { role: "system", content: buildSystemPrompt(context) },
         { role: "user", content: communicationPrompt }

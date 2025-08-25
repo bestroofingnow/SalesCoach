@@ -488,7 +488,7 @@ export default function Chat() {
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
+                  placeholder="Ask me about roofing techniques, training content, or help with professional communications..."
                   disabled={sendMessageMutation.isPending}
                   className="flex-1 h-11 text-base"
                 />
