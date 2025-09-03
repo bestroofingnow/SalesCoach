@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useState, useRef, useEffect } from "react";
 
 interface SidebarProgress {
   overall: { completed: number; total: number };
@@ -24,9 +25,25 @@ export default function Sidebar() {
     queryKey: ["/api/users/progress"],
     retry: false,
   });
+  
+  const [hoveredTrack, setHoveredTrack] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const trackRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const overallProgress = progress?.overall ? 
     (progress.overall.completed / progress.overall.total) * 100 : 0;
+
+  useEffect(() => {
+    if (hoveredTrack && trackRefs.current[hoveredTrack]) {
+      const rect = trackRefs.current[hoveredTrack]?.getBoundingClientRect();
+      if (rect) {
+        setDropdownPosition({
+          top: rect.top,
+          left: rect.right + 8
+        });
+      }
+    }
+  }, [hoveredTrack]);
 
   return (
     <aside className="hidden lg:block w-64 bg-white shadow-xl h-screen sticky top-0 border-r border-slate-200">
@@ -94,7 +111,13 @@ export default function Sidebar() {
             const trackProgress = track.total > 0 ? (track.completed / track.total) * 100 : 0;
             
             return (
-              <div key={track.id} className="group relative">
+              <div 
+                key={track.id} 
+                className="relative"
+                ref={(el) => trackRefs.current[track.id] = el}
+                onMouseEnter={() => setHoveredTrack(track.id)}
+                onMouseLeave={() => setHoveredTrack(null)}
+              >
                 <Button
                   variant="ghost" 
                   className="w-full justify-start text-slate-600 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-200 mb-1"
@@ -130,36 +153,6 @@ export default function Sidebar() {
                     </div>
                   </div>
                 </Button>
-                
-                {/* Track Modules - Hidden by Default, Show on Hover */}
-                <div 
-                  className="absolute left-0 top-0 w-64 bg-white shadow-2xl rounded-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible pointer-events-none group-hover:pointer-events-auto transition-all duration-200"
-                  style={{ 
-                    marginLeft: '16.5rem',
-                    zIndex: 999999,
-                    position: 'fixed',
-                    transform: 'translateY(0)'
-                  }}
-                >
-                  <div className="mb-2">
-                    <h4 className="font-semibold text-slate-800 text-sm">{track.name} Modules</h4>
-                    <p className="text-xs text-slate-500">{track.completed} of {track.total} completed</p>
-                  </div>
-                  <div className="space-y-1 max-h-64 overflow-y-auto">
-                    {track.modules?.map((module) => (
-                      <button
-                        key={module.id}
-                        className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center"
-                        onClick={() => window.location.href = `/module/${module.id}`}
-                      >
-                        <i className={`fas fa-circle text-xs mr-2 ${
-                          module.completed ? 'text-green-500' : 'text-slate-300'
-                        }`}></i>
-                        <span className="truncate">{module.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             );
           })}
@@ -205,6 +198,48 @@ export default function Sidebar() {
           </nav>
         </div>
       </div>
+      
+      {/* Floating Dropdown Menu - Rendered Outside Main Container */}
+      {hoveredTrack && progress?.tracks?.find(t => t.id === hoveredTrack) && (
+        <div 
+          className="fixed w-64 bg-white shadow-2xl rounded-xl border border-slate-200 p-3 transition-all duration-200"
+          style={{ 
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            zIndex: 999999
+          }}
+          onMouseEnter={() => setHoveredTrack(hoveredTrack)}
+          onMouseLeave={() => setHoveredTrack(null)}
+        >
+          {(() => {
+            const track = progress.tracks.find(t => t.id === hoveredTrack);
+            if (!track) return null;
+            
+            return (
+              <>
+                <div className="mb-2">
+                  <h4 className="font-semibold text-slate-800 text-sm">{track.name} Modules</h4>
+                  <p className="text-xs text-slate-500">{track.completed} of {track.total} completed</p>
+                </div>
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {track.modules?.map((module) => (
+                    <button
+                      key={module.id}
+                      className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center"
+                      onClick={() => window.location.href = `/module/${module.id}`}
+                    >
+                      <i className={`fas fa-circle text-xs mr-2 ${
+                        module.completed ? 'text-green-500' : 'text-slate-300'
+                      }`}></i>
+                      <span className="truncate">{module.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
     </aside>
   );
 }
