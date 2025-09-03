@@ -29,8 +29,8 @@ export default function Sidebar() {
     (progress.overall.completed / progress.overall.total) * 100 : 0;
 
   return (
-    <aside className="hidden lg:block w-64 bg-white shadow-xl h-screen sticky top-0 border-r border-slate-200 z-50">
-      <div className="p-6 h-full sidebar-container">
+    <aside className="hidden lg:block w-64 bg-white shadow-xl h-screen sticky top-0 border-r border-slate-200">
+      <div className="p-6 h-full overflow-y-auto">
         {/* Enhanced Overall Progress */}
         <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl p-5 mb-6 text-white shadow-lg">
           <div className="flex items-center mb-3">
@@ -90,7 +90,6 @@ export default function Sidebar() {
           
           {/* Training Tracks - Collapsed by Default */}
           <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide px-3 mb-2 mt-6">Training Tracks</div>
-          <div className="relative">
           {progress?.tracks?.map((track) => {
             const trackProgress = track.total > 0 ? (track.completed / track.total) * 100 : 0;
             
@@ -133,7 +132,15 @@ export default function Sidebar() {
                 </Button>
                 
                 {/* Track Modules - Hidden by Default, Show on Hover */}
-                <div className="sidebar-dropdown left-full top-0 ml-2 w-64 bg-white shadow-2xl rounded-xl border border-slate-200 p-3 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200">
+                <div 
+                  className="absolute left-0 top-0 w-64 bg-white shadow-2xl rounded-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible pointer-events-none group-hover:pointer-events-auto transition-all duration-200"
+                  style={{ 
+                    marginLeft: '16.5rem',
+                    zIndex: 999999,
+                    position: 'fixed',
+                    transform: 'translateY(0)'
+                  }}
+                >
                   <div className="mb-2">
                     <h4 className="font-semibold text-slate-800 text-sm">{track.name} Modules</h4>
                     <p className="text-xs text-slate-500">{track.completed} of {track.total} completed</p>
@@ -156,7 +163,6 @@ export default function Sidebar() {
               </div>
             );
           })}
-          </div>
           
         </nav>
         
