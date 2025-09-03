@@ -29,6 +29,7 @@ export default function Sidebar() {
   const [hoveredTrack, setHoveredTrack] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const trackRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const overallProgress = progress?.overall ? 
     (progress.overall.completed / progress.overall.total) * 100 : 0;
@@ -39,11 +40,39 @@ export default function Sidebar() {
       if (rect) {
         setDropdownPosition({
           top: rect.top,
-          left: rect.right + 8
+          left: rect.right - 4  // Reduced gap to make it easier to reach
         });
       }
     }
   }, [hoveredTrack]);
+
+  const handleMouseEnter = (trackId: string) => {
+    // Clear any pending timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setHoveredTrack(trackId);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a delay before hiding to allow mouse to move to dropdown
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredTrack(null);
+    }, 100);
+  };
+
+  const handleDropdownMouseEnter = () => {
+    // Clear timeout when entering dropdown
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  };
+
+  const handleDropdownMouseLeave = () => {
+    setHoveredTrack(null);
+  };
 
   return (
     <aside className="hidden lg:block w-64 bg-white shadow-xl h-screen sticky top-0 border-r border-slate-200">
@@ -115,8 +144,8 @@ export default function Sidebar() {
                 key={track.id} 
                 className="relative"
                 ref={(el) => trackRefs.current[track.id] = el}
-                onMouseEnter={() => setHoveredTrack(track.id)}
-                onMouseLeave={() => setHoveredTrack(null)}
+                onMouseEnter={() => handleMouseEnter(track.id)}
+                onMouseLeave={handleMouseLeave}
               >
                 <Button
                   variant="ghost" 
@@ -199,46 +228,63 @@ export default function Sidebar() {
         </div>
       </div>
       
-      {/* Floating Dropdown Menu - Rendered Outside Main Container */}
+      {/* Floating Dropdown Menu with Hover Bridge */}
       {hoveredTrack && progress?.tracks?.find(t => t.id === hoveredTrack) && (
-        <div 
-          className="fixed w-64 bg-white shadow-2xl rounded-xl border border-slate-200 p-3 transition-all duration-200"
-          style={{ 
-            top: `${dropdownPosition.top}px`,
-            left: `${dropdownPosition.left}px`,
-            zIndex: 999999
-          }}
-          onMouseEnter={() => setHoveredTrack(hoveredTrack)}
-          onMouseLeave={() => setHoveredTrack(null)}
-        >
-          {(() => {
-            const track = progress.tracks.find(t => t.id === hoveredTrack);
-            if (!track) return null;
-            
-            return (
-              <>
-                <div className="mb-2">
-                  <h4 className="font-semibold text-slate-800 text-sm">{track.name} Modules</h4>
-                  <p className="text-xs text-slate-500">{track.completed} of {track.total} completed</p>
-                </div>
-                <div className="space-y-1 max-h-64 overflow-y-auto">
-                  {track.modules?.map((module) => (
-                    <button
-                      key={module.id}
-                      className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center"
-                      onClick={() => window.location.href = `/module/${module.id}`}
-                    >
-                      <i className={`fas fa-circle text-xs mr-2 ${
-                        module.completed ? 'text-green-500' : 'text-slate-300'
-                      }`}></i>
-                      <span className="truncate">{module.title}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            );
-          })()}
-        </div>
+        <>
+          {/* Invisible bridge to maintain hover while moving mouse */}
+          <div 
+            className="fixed"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              left: `${264}px`, // Width of sidebar
+              width: `${dropdownPosition.left - 264}px`, // Bridge width
+              height: '48px', // Height of button
+              zIndex: 999998,
+            }}
+            onMouseEnter={handleDropdownMouseEnter}
+            onMouseLeave={handleDropdownMouseLeave}
+          />
+          
+          {/* Dropdown Menu */}
+          <div 
+            className="fixed w-64 bg-white shadow-2xl rounded-xl border border-slate-200 p-3 transition-all duration-200"
+            style={{ 
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              zIndex: 999999
+            }}
+            onMouseEnter={handleDropdownMouseEnter}
+            onMouseLeave={handleDropdownMouseLeave}
+          >
+            {(() => {
+              const track = progress.tracks.find(t => t.id === hoveredTrack);
+              if (!track) return null;
+              
+              return (
+                <>
+                  <div className="mb-2">
+                    <h4 className="font-semibold text-slate-800 text-sm">{track.name} Modules</h4>
+                    <p className="text-xs text-slate-500">{track.completed} of {track.total} completed</p>
+                  </div>
+                  <div className="space-y-1 max-h-64 overflow-y-auto">
+                    {track.modules?.map((module) => (
+                      <button
+                        key={module.id}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center"
+                        onClick={() => window.location.href = `/module/${module.id}`}
+                      >
+                        <i className={`fas fa-circle text-xs mr-2 ${
+                          module.completed ? 'text-green-500' : 'text-slate-300'
+                        }`}></i>
+                        <span className="truncate">{module.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </>
       )}
     </aside>
   );
