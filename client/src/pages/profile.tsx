@@ -25,7 +25,9 @@ import {
   TrendingUp,
   Settings,
   Save,
-  Edit
+  Edit,
+  Key,
+  X
 } from "lucide-react";
 
 interface UserProfile {
@@ -56,6 +58,12 @@ export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
@@ -78,6 +86,32 @@ export default function Profile() {
   // Fetch user stats
   const { data: stats } = useQuery<UserStats>({
     queryKey: ["/api/users/stats"],
+  });
+
+  // Change password mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: typeof passwordData) => {
+      const response = await apiRequest("POST", "/api/users/change-password", {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword
+      });
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password changed",
+        description: "Your password has been successfully updated.",
+      });
+      setIsChangingPassword(false);
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Password change failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Update profile mutation
@@ -117,6 +151,26 @@ export default function Profile() {
       location: profile?.location || ""
     });
     setIsEditing(true);
+  };
+
+  const handlePasswordChange = () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+    changePasswordMutation.mutate(passwordData);
   };
 
   const getInitials = () => {
@@ -283,6 +337,86 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+
+            {/* Password Change Section */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Key className="h-5 w-5 mr-2" />
+                    Change Password
+                  </span>
+                  {!isChangingPassword && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsChangingPassword(true)}
+                    >
+                      Change Password
+                    </Button>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Keep your account secure by updating your password regularly
+                </CardDescription>
+              </CardHeader>
+              {isChangingPassword && (
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                      placeholder="Enter current password"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                      placeholder="Enter new password (min 6 characters)"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                      placeholder="Confirm new password"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handlePasswordChange}
+                      disabled={changePasswordMutation.isPending}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Update Password
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsChangingPassword(false);
+                        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                      }}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

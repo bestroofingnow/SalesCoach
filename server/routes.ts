@@ -5,7 +5,7 @@ import { z } from "zod";
 import { insertProgressSchema, insertQuizResponseSchema, loginSchema, createUserByAdminSchema, insertChatConversationSchema, insertChatMessageSchema } from "@shared/schema";
 import { generateContextualHint, generateQuizHint, explainConcept } from "./ai-hints";
 import { generateChatResponse, generateCommunicationDraft } from "./chat-service";
-import { authenticateUser, authMiddleware, adminMiddleware, hashPassword } from "./auth";
+import { authenticateUser, authMiddleware, adminMiddleware, hashPassword, verifyPassword } from "./auth";
 import bcrypt from "bcryptjs";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
@@ -142,6 +142,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user stats:", error);
       res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  // Change password endpoint for users
+  app.post('/api/users/change-password', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      }
+      
+      // Get user with password
+      const user = await storage.getUser(userId);
+      if (!user || !user.password) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const isValidPassword = await verifyPassword(currentPassword, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password and update
+      const hashedPassword = await hashPassword(newPassword);
+      await storage.updateUser(userId, { password: hashedPassword });
+      
+      res.json({ success: true, message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
     }
   });
 
