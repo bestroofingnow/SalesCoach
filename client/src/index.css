@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styles for sidebar dropdown */
+@layer utilities {
+  .sidebar-dropdown {
+    z-index: 99999 !important;
+    position: absolute !important;
+  }
+  
+  .sidebar-container {
+    overflow-x: visible !important;
+    overflow-y: auto;
+  }
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);
