@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
-import PracticeCallRecorder from "@/components/phone-training/practice-call-recorder";
+import { VapiPractice } from "@/components/vapi-practice";
 import ScriptLibrary from "@/components/phone-training/script-library";
 import PerformanceDashboard from "@/components/phone-training/performance-dashboard";
 import PracticeScenarios from "@/components/phone-training/practice-scenarios";
@@ -295,7 +295,7 @@ export default function PhoneTraining() {
 
               {/* Practice Calls Tab */}
               <TabsContent value="practice">
-                <PracticeCallRecorder />
+                <VapiPractice scenarioType="cold-call" />
               </TabsContent>
 
               {/* Script Library Tab */}
