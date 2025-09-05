@@ -108,11 +108,26 @@ export default function PhoneTraining() {
                     size="lg"
                     className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3"
                     onClick={() => {
-                      // Trigger the Vapi widget
+                      // Trigger the Vapi widget - try multiple methods
                       const vapiWidget = document.querySelector('vapi-widget') as any;
-                      if (vapiWidget && vapiWidget.shadowRoot) {
-                        const button = vapiWidget.shadowRoot.querySelector('button');
-                        if (button) button.click();
+                      if (vapiWidget) {
+                        // Try to click the CTA button if it exists
+                        if (vapiWidget.shadowRoot) {
+                          const ctaButton = vapiWidget.shadowRoot.querySelector('[data-testid="cta-button"], .vapi-cta-button, button');
+                          if (ctaButton) {
+                            ctaButton.click();
+                            return;
+                          }
+                        }
+                        // Try to call the widget's methods directly
+                        if (typeof vapiWidget.open === 'function') {
+                          vapiWidget.open();
+                        } else if (typeof vapiWidget.start === 'function') {
+                          vapiWidget.start();
+                        } else {
+                          // Fallback: dispatch a custom event
+                          vapiWidget.dispatchEvent(new Event('click'));
+                        }
                       }
                     }}
                     data-testid="button-start-ai-practice"

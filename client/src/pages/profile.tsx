@@ -55,7 +55,7 @@ interface UserStats {
 }
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -236,22 +236,30 @@ export default function Profile() {
                     </div>
                   </div>
                 </div>
-                {!isEditing ? (
-                  <Button onClick={handleEdit} variant="outline">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                ) : (
-                  <div className="flex space-x-2">
-                    <Button onClick={handleSave} disabled={updateProfileMutation.isPending}>
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Changes
-                    </Button>
-                    <Button onClick={() => setIsEditing(false)} variant="outline">
-                      Cancel
-                    </Button>
-                  </div>
-                )}
+                <div className="flex gap-2">
+                  {!isEditing ? (
+                    <>
+                      <Button onClick={handleEdit} variant="outline">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                      <Button onClick={() => logout()} variant="destructive">
+                        <i className="fas fa-sign-out-alt mr-2"></i>
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex space-x-2">
+                      <Button onClick={handleSave} disabled={updateProfileMutation.isPending}>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </Button>
+                      <Button onClick={() => setIsEditing(false)} variant="outline">
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Profile Information */}
