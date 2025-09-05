@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Phone, PhoneOff, Mic, MicOff, Volume2 } from "lucide-react";
+import { Phone, Mic, Volume2 } from "lucide-react";
 
 interface VapiPracticeProps {
   scenarioType?: 'cold-call' | 'follow-up' | 'objection-handling' | 'closing';
@@ -9,33 +8,18 @@ interface VapiPracticeProps {
 }
 
 export function VapiPractice({ scenarioType = 'cold-call', moduleId }: VapiPracticeProps) {
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
-  const [isCallActive, setIsCallActive] = useState(false);
+  const widgetContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check if script is already loaded
-    const existingScript = document.querySelector('script[src*="vapi-ai/client-sdk-react"]');
-    
-    if (existingScript) {
-      setIsScriptLoaded(true);
-      return;
+    // Insert the Vapi widget when component mounts
+    if (widgetContainerRef.current) {
+      widgetContainerRef.current.innerHTML = `
+        <vapi-widget 
+          assistant-id="9fb2d481-9e44-427e-aab3-c88a89ab2b1a" 
+          public-key="c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2"
+        ></vapi-widget>
+      `;
     }
-
-    // Load Vapi widget script
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/@vapi-ai/client-sdk-react/dist/embed/widget.umd.js';
-    script.async = true;
-    script.type = 'text/javascript';
-    
-    script.onload = () => {
-      setIsScriptLoaded(true);
-    };
-
-    document.body.appendChild(script);
-
-    return () => {
-      // Cleanup if needed
-    };
   }, []);
 
   const getScenarioInstructions = () => {
@@ -141,30 +125,12 @@ export function VapiPractice({ scenarioType = 'cold-call', moduleId }: VapiPract
             </div>
 
             {/* Vapi Widget Container */}
-            <div className="vapi-widget-container">
-              {isScriptLoaded ? (
-                <div 
-                  dangerouslySetInnerHTML={{
-                    __html: `
-                      <vapi-widget 
-                        assistant-id="9fb2d481-9e44-427e-aab3-c88a89ab2b1a" 
-                        public-key="c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2"
-                      ></vapi-widget>
-                    `
-                  }}
-                />
-              ) : (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-slate-500">
-                    <i className="fas fa-spinner fa-spin mr-2"></i>
-                    Loading practice session...
-                  </div>
-                </div>
-              )}
+            <div className="flex justify-center">
+              <div ref={widgetContainerRef} className="vapi-widget-container"></div>
             </div>
 
-            <div className="text-sm text-slate-500">
-              Click the phone button above to start your practice session
+            <div className="text-sm text-slate-500 mt-4">
+              Click the phone button above to start your practice session with Coach Mike
             </div>
           </div>
 
