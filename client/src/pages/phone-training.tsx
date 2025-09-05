@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,41 @@ export default function PhoneTraining() {
     retry: false,
   });
 
+  useEffect(() => {
+    // Add Vapi widget to the page on mount
+    const vapiWidgetExists = document.querySelector('vapi-widget');
+    if (!vapiWidgetExists) {
+      const vapiWidget = document.createElement('div');
+      vapiWidget.innerHTML = `
+        <vapi-widget
+          public-key="c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2"
+          assistant-id="9fb2d481-9e44-427e-aab3-c88a89ab2b1a"
+          mode="voice"
+          theme="dark"
+          base-bg-color="#000000"
+          accent-color="#14B8A6"
+          cta-button-color="#000000"
+          cta-button-text-color="#ffffff"
+          border-radius="large"
+          size="full"
+          position="bottom-right"
+          title="TALK WITH AI"
+          start-button-text="Start"
+          end-button-text="End Call"
+          cta-title="PRACTICE CALLS"
+          chat-first-message="Hey, How can I help you today?"
+          chat-placeholder="Type your message..."
+          voice-show-transcript="true"
+          consent-required="true"
+          consent-title="Terms and conditions"
+          consent-content="By clicking &quot;Agree,&quot; and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as otherwise described in our Terms of Service."
+          consent-storage-key="vapi_widget_consent"
+        ></vapi-widget>
+      `;
+      document.body.appendChild(vapiWidget);
+    }
+  }, []);
+
   if (isLoading || statsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -63,9 +98,28 @@ export default function PhoneTraining() {
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-100 rounded-lg flex items-center justify-center mb-3 sm:mb-0">
                   <i className="fas fa-phone text-teal-500 text-xl sm:text-2xl"></i>
                 </div>
-                <div>
+                <div className="flex-1">
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Phone Training</h1>
                   <p className="text-sm sm:text-base text-gray-600">Master cold calling and appointment setting skills</p>
+                </div>
+                {/* Vapi Widget Button - Always visible at top */}
+                <div className="mt-4 sm:mt-0">
+                  <Button 
+                    size="lg"
+                    className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3"
+                    onClick={() => {
+                      // Trigger the Vapi widget
+                      const vapiWidget = document.querySelector('vapi-widget') as any;
+                      if (vapiWidget && vapiWidget.shadowRoot) {
+                        const button = vapiWidget.shadowRoot.querySelector('button');
+                        if (button) button.click();
+                      }
+                    }}
+                    data-testid="button-start-ai-practice"
+                  >
+                    <i className="fas fa-headset mr-2"></i>
+                    START AI PRACTICE CALL
+                  </Button>
                 </div>
               </div>
 
