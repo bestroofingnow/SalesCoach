@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
-import MobileNav from "@/components/layout/mobile-nav";
 import ProgressCard from "@/components/training/progress-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,10 +67,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <MobileNav />
-      <div className="hidden lg:block">
-        <Navbar />
-      </div>
+      <Navbar />
       
       <div className="flex">
         <Sidebar />

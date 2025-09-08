@@ -4,7 +4,6 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
-import MobileNav from "@/components/layout/mobile-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -49,10 +48,7 @@ export default function TrainingTrack() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <MobileNav />
-      <div className="hidden lg:block">
-        <Navbar />
-      </div>
+      <Navbar />
       
       <div className="flex">
         <Sidebar />

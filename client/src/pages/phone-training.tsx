@@ -8,7 +8,6 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
-import MobileNav from "@/components/layout/mobile-nav";
 import { VapiPractice } from "@/components/vapi-practice";
 import ScriptLibrary from "@/components/phone-training/script-library";
 import PerformanceDashboard from "@/components/phone-training/performance-dashboard";
@@ -82,10 +81,7 @@ export default function PhoneTraining() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <MobileNav />
-      <div className="hidden lg:block">
-        <Navbar />
-      </div>
+      <Navbar />
       
       <div className="flex">
         <Sidebar />

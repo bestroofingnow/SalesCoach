@@ -75,7 +75,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:block w-64 bg-white shadow-xl h-screen sticky top-0 border-r border-slate-200">
+    <aside className="w-64 bg-white shadow-xl h-screen sticky top-0 border-r border-slate-200">
       <div className="p-6 h-full overflow-y-auto">
         {/* Enhanced Overall Progress */}
         <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-2xl p-5 mb-6 text-white shadow-lg">
