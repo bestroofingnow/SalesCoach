@@ -7,6 +7,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Upload, Video } from "lucide-react";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
 import { VideoUploader } from "@/components/video/VideoUploader";
+import { LessonNotes } from "@/components/notes/lesson-notes";
 
 interface Lesson {
   id: string;
@@ -20,9 +21,10 @@ interface Lesson {
 interface LessonContentProps {
   lesson: Lesson;
   isAdmin?: boolean;
+  moduleId?: string;
 }
 
-export default function LessonContent({ lesson, isAdmin = false }: LessonContentProps) {
+export default function LessonContent({ lesson, isAdmin = false, moduleId }: LessonContentProps) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showVideoUploader, setShowVideoUploader] = useState(false);
   const { toast } = useToast();
@@ -176,6 +178,9 @@ export default function LessonContent({ lesson, isAdmin = false }: LessonContent
           </div>
         </CardContent>
       </Card>
+
+      {/* Notes Section */}
+      <LessonNotes lessonId={lesson.id} moduleId={moduleId} />
 
       {/* Video Uploader Modal */}
       <VideoUploader
