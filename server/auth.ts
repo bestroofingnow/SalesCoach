@@ -18,7 +18,8 @@ export function generateToken(user: User): string {
     { 
       id: user.id, 
       email: user.email,
-      role: user.role 
+      role: user.role,
+      companyId: user.companyId 
     },
     JWT_SECRET,
     { expiresIn: '7d' }
@@ -76,10 +77,38 @@ export async function authMiddleware(req: any, res: any, next: any) {
   next();
 }
 
-// Admin middleware to check if user is admin
+// Admin middleware to check if user is admin or super_admin
 export function adminMiddleware(req: any, res: any, next: any) {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super_admin')) {
     return res.status(403).json({ message: 'Forbidden: Admin access required' });
   }
   next();
+}
+
+// Super admin only middleware
+export function superAdminMiddleware(req: any, res: any, next: any) {
+  if (!req.user || req.user.role !== 'super_admin') {
+    return res.status(403).json({ message: 'Forbidden: Super Admin access required' });
+  }
+  next();
+}
+
+// Company admin middleware (admin of their own company)
+export function companyAdminMiddleware(req: any, res: any, next: any) {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  
+  // Super admins can access everything
+  if (req.user.role === 'super_admin') {
+    return next();
+  }
+  
+  // Company admins can only manage their own company
+  if (req.user.role === 'admin' && req.user.companyId) {
+    req.companyId = req.user.companyId;
+    return next();
+  }
+  
+  return res.status(403).json({ message: 'Forbidden: Company Admin access required' });
 }
