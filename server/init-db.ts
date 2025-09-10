@@ -2,6 +2,7 @@ import { db } from './db';
 import { companies, users, trainingTracks, trainingModules, lessons, quizQuestions } from '@shared/schema';
 import { hashPassword } from './auth';
 import { sql } from 'drizzle-orm';
+import { createComprehensiveTrainingData } from './training-data';
 
 export async function initializeDatabase() {
   try {
@@ -105,6 +106,8 @@ export async function initializeDatabase() {
     const tracks = await db.select().from(trainingTracks);
     if (tracks.length === 0) {
       await createInitialTrainingData();
+    } else {
+      console.log('Training data already exists, skipping creation');
     }
     
     console.log('Database initialization complete');
@@ -114,85 +117,6 @@ export async function initializeDatabase() {
 }
 
 async function createInitialTrainingData() {
-  console.log('Creating initial training data...');
-  
-  // Create the three main training tracks
-  const [residentialTrack] = await db.insert(trainingTracks).values({
-    name: 'Residential Roofing',
-    description: 'Master residential roofing techniques and sales',
-    icon: 'home',
-    color: 'blue',
-    totalModules: 8
-  }).returning();
-  
-  const [commercialTrack] = await db.insert(trainingTracks).values({
-    name: 'Commercial Roofing', 
-    description: 'Learn commercial roofing systems and projects',
-    icon: 'building',
-    color: 'green',
-    totalModules: 8
-  }).returning();
-  
-  const [restorationTrack] = await db.insert(trainingTracks).values({
-    name: 'Restoration & Insurance',
-    description: 'Insurance claims and restoration expertise',
-    icon: 'shield',
-    color: 'purple',
-    totalModules: 8
-  }).returning();
-  
-  // Create a sample module for each track
-  const [residentialModule1] = await db.insert(trainingModules).values({
-    trackId: residentialTrack.id,
-    title: 'Company Culture & Core Values',
-    description: 'Understanding your company\'s mission and values',
-    icon: 'star',
-    orderIndex: 1,
-    totalLessons: 3
-  }).returning();
-  
-  const [commercialModule1] = await db.insert(trainingModules).values({
-    trackId: commercialTrack.id,
-    title: 'Commercial Roofing Fundamentals',
-    description: 'Introduction to commercial roofing systems',
-    icon: 'briefcase',
-    orderIndex: 1,
-    totalLessons: 3
-  }).returning();
-  
-  const [restorationModule1] = await db.insert(trainingModules).values({
-    trackId: restorationTrack.id,
-    title: 'Insurance Fundamentals',
-    description: 'Understanding insurance processes and claims',
-    icon: 'clipboard',
-    orderIndex: 1,
-    totalLessons: 3
-  }).returning();
-  
-  // Create sample lessons
-  await db.insert(lessons).values([
-    {
-      moduleId: residentialModule1.id,
-      title: 'Welcome to Your Roofing Company',
-      content: '<h1>Welcome to Your Roofing Company</h1><p>Learn about our company history, mission, and values.</p>',
-      orderIndex: 1,
-      estimatedMinutes: 15
-    },
-    {
-      moduleId: commercialModule1.id,
-      title: 'Types of Commercial Roofing',
-      content: '<h1>Commercial Roofing Systems</h1><p>Overview of different commercial roofing types.</p>',
-      orderIndex: 1,
-      estimatedMinutes: 20
-    },
-    {
-      moduleId: restorationModule1.id,
-      title: 'Insurance Basics',
-      content: '<h1>Understanding Insurance</h1><p>How insurance claims work in roofing.</p>',
-      orderIndex: 1,
-      estimatedMinutes: 25
-    }
-  ]);
-  
-  console.log('Initial training data created');
+  // Use the comprehensive training data
+  await createComprehensiveTrainingData();
 }
