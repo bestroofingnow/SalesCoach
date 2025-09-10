@@ -5,7 +5,8 @@ import { z } from "zod";
 import { insertProgressSchema, insertQuizResponseSchema, loginSchema, createUserByAdminSchema, insertChatConversationSchema, insertChatMessageSchema } from "@shared/schema";
 import { generateContextualHint, generateQuizHint, explainConcept } from "./ai-hints";
 import { generateChatResponse, generateCommunicationDraft } from "./chat-service";
-import { authenticateUser, authMiddleware, adminMiddleware, hashPassword, verifyPassword } from "./auth";
+import { authenticateUser, authMiddleware, adminMiddleware, companyAdminMiddleware, superAdminMiddleware, hashPassword, verifyPassword } from "./auth";
+import { vapiService } from "./vapi-service";
 import bcrypt from "bcryptjs";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
@@ -280,6 +281,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error changing password:", error);
       res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // VAPI Role-Play Training Routes
+  app.get('/api/vapi/agent', authMiddleware, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "User not associated with a company" });
+      }
+      
+      const agent = await vapiService.getOrCreateVapiAgent(companyId);
+      if (!agent) {
+        return res.status(500).json({ message: "Failed to get or create VAPI agent" });
+      }
+      
+      res.json(agent);
+    } catch (error) {
+      console.error("Error fetching VAPI agent:", error);
+      res.status(500).json({ message: "Failed to fetch VAPI agent" });
+    }
+  });
+  
+  app.post('/api/vapi/start-call', authMiddleware, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "User not associated with a company" });
+      }
+      
+      const { phoneNumber } = req.body;
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+      
+      const agent = await vapiService.getOrCreateVapiAgent(companyId);
+      if (!agent) {
+        return res.status(500).json({ message: "Failed to get VAPI agent" });
+      }
+      
+      const call = await vapiService.startPhoneCall(agent, phoneNumber);
+      if (!call) {
+        return res.status(500).json({ message: "Failed to start phone call" });
+      }
+      
+      res.json(call);
+    } catch (error) {
+      console.error("Error starting VAPI call:", error);
+      res.status(500).json({ message: "Failed to start phone call" });
+    }
+  });
+  
+  app.put('/api/vapi/agent/:agentId', authMiddleware, companyAdminMiddleware, async (req: any, res) => {
+    try {
+      const { agentId } = req.params;
+      const updates = req.body;
+      
+      const updatedAgent = await vapiService.updateAgentConfiguration(agentId, updates);
+      if (!updatedAgent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      res.json(updatedAgent);
+    } catch (error) {
+      console.error("Error updating VAPI agent:", error);
+      res.status(500).json({ message: "Failed to update VAPI agent" });
+    }
+  });
+
+  // Company management routes (for admins)
+  app.get('/api/company', authMiddleware, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "User not associated with a company" });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      res.json(company);
+    } catch (error) {
+      console.error("Error fetching company:", error);
+      res.status(500).json({ message: "Failed to fetch company" });
+    }
+  });
+  
+  app.put('/api/company', authMiddleware, companyAdminMiddleware, async (req: any, res) => {
+    try {
+      const companyId = req.companyId || req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "Company ID not found" });
+      }
+      
+      const updates = req.body;
+      const updatedCompany = await storage.updateCompany(companyId, updates);
+      
+      if (!updatedCompany) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      res.json(updatedCompany);
+    } catch (error) {
+      console.error("Error updating company:", error);
+      res.status(500).json({ message: "Failed to update company" });
+    }
+  });
+
+  // User notes routes
+  app.get('/api/notes', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const notes = await storage.getUserNotes(userId);
+      res.json(notes);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      res.status(500).json({ message: "Failed to fetch notes" });
+    }
+  });
+  
+  app.get('/api/lessons/:lessonId/notes', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      const { lessonId } = req.params;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const notes = await storage.getNotesByLesson(userId, lessonId);
+      res.json(notes);
+    } catch (error) {
+      console.error("Error fetching lesson notes:", error);
+      res.status(500).json({ message: "Failed to fetch lesson notes" });
+    }
+  });
+  
+  app.post('/api/notes', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const noteData = {
+        ...req.body,
+        userId
+      };
+      
+      const note = await storage.createUserNote(noteData);
+      res.json(note);
+    } catch (error) {
+      console.error("Error creating note:", error);
+      res.status(500).json({ message: "Failed to create note" });
+    }
+  });
+  
+  app.put('/api/notes/:noteId', authMiddleware, async (req: any, res) => {
+    try {
+      const { noteId } = req.params;
+      const { content } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+      
+      const updatedNote = await storage.updateUserNote(noteId, content);
+      if (!updatedNote) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+      
+      res.json(updatedNote);
+    } catch (error) {
+      console.error("Error updating note:", error);
+      res.status(500).json({ message: "Failed to update note" });
+    }
+  });
+  
+  app.delete('/api/notes/:noteId', authMiddleware, async (req: any, res) => {
+    try {
+      const { noteId } = req.params;
+      
+      await storage.deleteUserNote(noteId);
+      res.json({ message: "Note deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      res.status(500).json({ message: "Failed to delete note" });
     }
   });
 
