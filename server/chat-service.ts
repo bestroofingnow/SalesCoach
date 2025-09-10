@@ -2,11 +2,11 @@ import OpenAI from "openai";
 import { storage } from "./storage";
 
 function getOpenAIClient(): OpenAI {
-  const apiKey = process.env.OPEN_AI_BRN_ASST;
+  const apiKey = process.env.OPENAI_API_KEY;
   console.log('OpenAI API Key status:', apiKey ? `Available (starts with: ${apiKey.substring(0, 15)}...)` : 'Not found');
   
   if (!apiKey) {
-    throw new Error('OPEN_AI_BRN_ASST environment variable is required for chat features');
+    throw new Error('OPENAI_API_KEY environment variable is required for chat features');
   }
   
   // Always create a fresh client to ensure we get the latest API key
@@ -16,6 +16,7 @@ function getOpenAIClient(): OpenAI {
 interface ChatContext {
   userId: string;
   userRole?: string;
+  companyId?: string;
   companyContext?: string;
 }
 
@@ -28,10 +29,11 @@ interface CompanyInfo {
   trainingAreas: string[];
 }
 
-const COMPANY_INFO: CompanyInfo = {
-  name: "Best Roofing Now",
+// Default company info - will be replaced with actual company data
+const DEFAULT_COMPANY_INFO: CompanyInfo = {
+  name: "Your Company",
   industry: "Roofing Services",
-  location: "Charlotte, North Carolina",
+  location: "Your Location",
   services: [
     "Residential Roofing",
     "Commercial Roofing", 
@@ -86,8 +88,30 @@ async function getRelevantTrainingContent(query: string): Promise<string> {
   }
 }
 
-function buildSystemPrompt(context: ChatContext): string {
-  const { name, industry, location, services, values, trainingAreas } = COMPANY_INFO;
+async function getCompanyInfo(companyId?: string): Promise<CompanyInfo> {
+  if (!companyId) return DEFAULT_COMPANY_INFO;
+  
+  try {
+    const company = await storage.getCompany(companyId);
+    if (!company) return DEFAULT_COMPANY_INFO;
+    
+    return {
+      name: company.name,
+      industry: company.industry || "Roofing Services",
+      location: company.location || "Your Location",
+      services: (company.services as string[]) || DEFAULT_COMPANY_INFO.services,
+      values: (company.values as string[]) || DEFAULT_COMPANY_INFO.values,
+      trainingAreas: (company.trainingAreas as string[]) || DEFAULT_COMPANY_INFO.trainingAreas
+    };
+  } catch (error) {
+    console.error('Error fetching company info:', error);
+    return DEFAULT_COMPANY_INFO;
+  }
+}
+
+async function buildSystemPrompt(context: ChatContext, companyInfo?: CompanyInfo): Promise<string> {
+  const info = companyInfo || await getCompanyInfo(context.companyId);
+  const { name, industry, location, services, values, trainingAreas } = info;
   
   return `You are an AI assistant for ${name}, a ${industry} company based in ${location}. 
 
@@ -140,8 +164,9 @@ export async function generateChatResponse(
       : message;
 
     // Prepare messages for OpenAI
+    const systemPrompt = await buildSystemPrompt(context);
     const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
-      { role: "system", content: buildSystemPrompt(context) }
+      { role: "system", content: systemPrompt }
     ];
 
     // Add conversation history (limit to last 10 exchanges to avoid token limits)
@@ -179,8 +204,9 @@ export async function generateCommunicationDraft(
 ): Promise<string> {
   try {
     const client = getOpenAIClient();
+    const companyInfo = await getCompanyInfo(context.companyId);
     
-    const communicationPrompt = `You are drafting a professional ${type} for ${COMPANY_INFO.name}, a roofing company in ${COMPANY_INFO.location}.
+    const communicationPrompt = `You are drafting a professional ${type} for ${companyInfo.name}, a roofing company in ${companyInfo.location}.
 
 TYPE: ${type}
 PURPOSE: ${purpose}
@@ -188,21 +214,22 @@ RECIPIENT: ${recipient}
 DETAILS: ${details}
 
 Please draft a professional ${type} that:
-- Reflects our company's values: ${COMPANY_INFO.values.join(', ')}
+- Reflects our company's values: ${companyInfo.values.join(', ')}
 - Uses appropriate tone for ${recipient}
 - Includes relevant company information when appropriate
 - Is well-structured and professional
 - Uses proper business format for ${type}
 - Emphasizes quality, safety, and customer satisfaction
 
-Make it specific to the roofing industry and our services: ${COMPANY_INFO.services.join(', ')}.
+Make it specific to the roofing industry and our services: ${companyInfo.services.join(', ')}.
 
-Include our company name "${COMPANY_INFO.name}" and location "${COMPANY_INFO.location}" where appropriate.`;
+Include our company name "${companyInfo.name}" and location "${companyInfo.location}" where appropriate.`;
 
+    const systemPrompt = await buildSystemPrompt(context, companyInfo);
     const response = await client.chat.completions.create({
       model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages: [
-        { role: "system", content: buildSystemPrompt(context) },
+        { role: "system", content: systemPrompt },
         { role: "user", content: communicationPrompt }
       ],
       max_completion_tokens: 800,

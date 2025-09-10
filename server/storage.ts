@@ -1,5 +1,8 @@
 import { 
   users, 
+  companies,
+  userNotes,
+  vapiAgents,
   trainingTracks, 
   trainingModules, 
   lessons, 
@@ -10,7 +13,13 @@ import {
   chatConversations,
   chatMessages,
   type User, 
-  type UpsertUser, 
+  type UpsertUser,
+  type Company,
+  type InsertCompany,
+  type UserNote,
+  type InsertUserNote,
+  type VapiAgent,
+  type InsertVapiAgent,
   type TrainingTrack, 
   type TrainingModule, 
   type Lesson, 
@@ -28,10 +37,18 @@ import { db } from "./db";
 import { eq, and, count, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
+  // Company methods
+  getCompany(id: string): Promise<Company | undefined>;
+  getCompanyBySubdomain(subdomain: string): Promise<Company | undefined>;
+  createCompany(companyData: InsertCompany): Promise<Company>;
+  updateCompany(id: string, companyData: Partial<Company>): Promise<Company | undefined>;
+  getAllCompanies(): Promise<Company[]>;
+  
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUsersByCompany(companyId: string): Promise<User[]>;
   createUser(userData: Omit<UpsertUser, 'id'>): Promise<User>;
   updateUser(id: string, userData: Partial<User>): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
@@ -68,9 +85,56 @@ export interface IStorage {
   getChatMessages(conversationId: string): Promise<ChatMessage[]>;
   addChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   updateConversationTitle(conversationId: string, title: string): Promise<ChatConversation>;
+  
+  // User notes methods
+  getUserNotes(userId: string): Promise<UserNote[]>;
+  getNotesByLesson(userId: string, lessonId: string): Promise<UserNote[]>;
+  createUserNote(noteData: InsertUserNote): Promise<UserNote>;
+  updateUserNote(id: string, content: string): Promise<UserNote | undefined>;
+  deleteUserNote(id: string): Promise<void>;
+  
+  // VAPI Agent methods
+  getVapiAgent(companyId: string): Promise<VapiAgent | undefined>;
+  createVapiAgent(agentData: InsertVapiAgent): Promise<VapiAgent>;
+  updateVapiAgent(id: string, agentData: Partial<VapiAgent>): Promise<VapiAgent | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
+  // Company methods
+  async getCompany(id: string): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    return company || undefined;
+  }
+
+  async getCompanyBySubdomain(subdomain: string): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.subdomain, subdomain));
+    return company || undefined;
+  }
+
+  async createCompany(companyData: InsertCompany): Promise<Company> {
+    const [company] = await db
+      .insert(companies)
+      .values(companyData)
+      .returning();
+    return company;
+  }
+
+  async updateCompany(id: string, companyData: Partial<Company>): Promise<Company | undefined> {
+    const [company] = await db
+      .update(companies)
+      .set({
+        ...companyData,
+        updatedAt: sql`NOW()`
+      })
+      .where(eq(companies.id, id))
+      .returning();
+    return company || undefined;
+  }
+
+  async getAllCompanies(): Promise<Company[]> {
+    return await db.select().from(companies);
+  }
+
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
@@ -108,6 +172,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  async getUsersByCompany(companyId: string): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.companyId, companyId));
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
@@ -373,6 +441,82 @@ export class DatabaseStorage implements IStorage {
       .where(eq(chatConversations.id, conversationId))
       .returning();
     return conversation;
+  }
+
+  // User notes methods
+  async getUserNotes(userId: string): Promise<UserNote[]> {
+    return await db
+      .select()
+      .from(userNotes)
+      .where(eq(userNotes.userId, userId))
+      .orderBy(sql`${userNotes.updatedAt} DESC`);
+  }
+
+  async getNotesByLesson(userId: string, lessonId: string): Promise<UserNote[]> {
+    return await db
+      .select()
+      .from(userNotes)
+      .where(and(
+        eq(userNotes.userId, userId),
+        eq(userNotes.lessonId, lessonId)
+      ))
+      .orderBy(sql`${userNotes.updatedAt} DESC`);
+  }
+
+  async createUserNote(noteData: InsertUserNote): Promise<UserNote> {
+    const [note] = await db
+      .insert(userNotes)
+      .values(noteData)
+      .returning();
+    return note;
+  }
+
+  async updateUserNote(id: string, content: string): Promise<UserNote | undefined> {
+    const [note] = await db
+      .update(userNotes)
+      .set({ 
+        content,
+        updatedAt: sql`NOW()` 
+      })
+      .where(eq(userNotes.id, id))
+      .returning();
+    return note || undefined;
+  }
+
+  async deleteUserNote(id: string): Promise<void> {
+    await db.delete(userNotes).where(eq(userNotes.id, id));
+  }
+
+  // VAPI Agent methods
+  async getVapiAgent(companyId: string): Promise<VapiAgent | undefined> {
+    const [agent] = await db
+      .select()
+      .from(vapiAgents)
+      .where(and(
+        eq(vapiAgents.companyId, companyId),
+        eq(vapiAgents.isActive, true)
+      ));
+    return agent || undefined;
+  }
+
+  async createVapiAgent(agentData: InsertVapiAgent): Promise<VapiAgent> {
+    const [agent] = await db
+      .insert(vapiAgents)
+      .values(agentData)
+      .returning();
+    return agent;
+  }
+
+  async updateVapiAgent(id: string, agentData: Partial<VapiAgent>): Promise<VapiAgent | undefined> {
+    const [agent] = await db
+      .update(vapiAgents)
+      .set({
+        ...agentData,
+        updatedAt: sql`NOW()`
+      })
+      .where(eq(vapiAgents.id, id))
+      .returning();
+    return agent || undefined;
   }
 }
 

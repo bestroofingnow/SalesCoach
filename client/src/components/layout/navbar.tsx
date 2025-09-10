@@ -18,8 +18,8 @@ export default function Navbar() {
                   <i className="fas fa-home text-white text-lg"></i>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">BRN Training Academy</h1>
-                  <p className="text-sm text-gray-500">Best Roofing Now</p>
+                  <h1 className="text-xl font-bold text-gray-900">Roofing Training Academy</h1>
+                  <p className="text-sm text-gray-500">Professional Sales Training</p>
                 </div>
               </div>
             </Link>

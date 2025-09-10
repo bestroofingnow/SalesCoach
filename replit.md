@@ -1,14 +1,26 @@
-# BRN Training Academy
+# Roofing Training Academy
 
 ## Overview
 
-BRN Training Academy is a comprehensive web-based training platform designed for Best Roofing Now, a Charlotte-based roofing company. The platform provides structured training programs across three main areas: residential roofing, commercial roofing, and restoration services. The system enables employees to progress through modular training content, complete quizzes, and track their learning advancement through an interactive dashboard.
+Roofing Training Academy is a comprehensive multi-tenant SaaS training platform designed for roofing companies that do door-to-door sales. The platform provides structured training programs across three main areas: residential roofing, commercial roofing, and restoration services. The system enables employees to progress through modular training content, complete quizzes, take notes, participate in VAPI.ai-powered role-play training, and track their learning advancement through an interactive dashboard. Companies can customize the platform with their branding, values, and company-specific knowledge.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (August 5, 2025)
+## Recent Changes (September 10, 2025)
+
+### Major Multi-Tenant Transformation
+- Converted from single-company to multi-tenant SaaS platform
+- Added three user levels: super_admin (platform owner), admin (company), user (trainee)
+- Removed all "Best Roofing Now" and "BRN" references
+- Added companies table with customizable settings
+- Added user notes functionality for training
+- Added VAPI agent configurations per company
+- Updated authentication to support multi-tenant structure
+- Pricing model: $99/month platform fee + $20/user
+
+## Previous Changes (August 5, 2025)
 
 ### Fixed Critical Issues
 - Resolved missing storage interface and database methods - created comprehensive IStorage interface with all required methods

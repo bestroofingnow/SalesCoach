@@ -11,9 +11,9 @@ export default function Landing() {
           </div>
           
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            BRN Training Academy
+            Roofing Training Academy
           </h1>
-          <p className="text-gray-600 mb-2">Best Roofing Now</p>
+          <p className="text-gray-600 mb-2">Professional Door-to-Door Sales Training</p>
           <p className="text-sm text-gray-500 mb-8">
             Master residential, commercial, and restoration roofing with our comprehensive training platform.
           </p>
