@@ -159,8 +159,12 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
   }
   
   async createVapiAssistant(agent: VapiAgent): Promise<any> {
-    if (!agent.vapiApiKey) {
-      console.error('VAPI API key not configured for agent');
+    // Since we're using a pre-configured assistant, this method is no longer needed
+    // but keeping it for backward compatibility
+    const vapiApiKey = process.env.VAPI_API_KEY;
+    
+    if (!vapiApiKey) {
+      console.error('VAPI_API_KEY environment variable not configured');
       return null;
     }
     
@@ -220,8 +224,11 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
   }
   
   async startPhoneCall(agent: VapiAgent, phoneNumber: string): Promise<any> {
-    if (!agent.vapiApiKey) {
-      console.error('VAPI API key not configured');
+    // Use the VAPI API key from environment
+    const vapiApiKey = process.env.VAPI_API_KEY;
+    
+    if (!vapiApiKey) {
+      console.error('VAPI_API_KEY environment variable not configured');
       return null;
     }
     
@@ -233,15 +240,15 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
       const response = await fetch(`${this.baseUrl}/calls`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${agent.vapiApiKey}`,
+          'Authorization': `Bearer ${vapiApiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           assistantId: DOOR_TO_DOOR_ASSISTANT_ID, // Use the hardcoded assistant ID for Door to Door Training
           customer: {
             number: phoneNumber
-          },
-          phoneNumberId: agent.vapiPhoneNumber // This would need to be configured in VAPI
+          }
+          // phoneNumberId is optional if assistant already has a number configured
         })
       });
       
