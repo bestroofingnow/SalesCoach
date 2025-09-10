@@ -13,6 +13,32 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Companies table for multi-tenancy
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  subdomain: varchar("subdomain").unique(), // for custom subdomains
+  logoUrl: text("logo_url"),
+  primaryColor: varchar("primary_color").default("#1a1a1a"),
+  // Company customization
+  industry: varchar("industry").default("Roofing Services"),
+  location: varchar("location"),
+  services: jsonb("services").default([]).notNull(), // Array of service offerings
+  values: jsonb("values").default([]).notNull(), // Array of company values
+  trainingAreas: jsonb("training_areas").default([]).notNull(), // Array of training focus areas
+  // Billing
+  subscriptionStatus: varchar("subscription_status").default("trial"), // trial, active, suspended, cancelled
+  subscriptionPlan: varchar("subscription_plan").default("basic"), // basic, pro, enterprise
+  monthlyPlatformFee: integer("monthly_platform_fee").default(99), // $99/month
+  perUserFee: integer("per_user_fee").default(20), // $20/user
+  activeUserCount: integer("active_user_count").default(0),
+  billingStartDate: timestamp("billing_start_date"),
+  nextBillingDate: timestamp("next_billing_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Session storage table for Replit Auth
 export const sessions = pgTable(
   "sessions",
@@ -24,15 +50,46 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table with password authentication
+// User storage table with password authentication and multi-tenancy
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").references(() => companies.id),
   email: varchar("email").unique().notNull(),
   password: varchar("password"), // hashed password - nullable for migration
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").default("trainee"), // trainee, instructor, admin
+  role: varchar("role").default("user"), // super_admin, admin, user
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User notes for training
+export const userNotes = pgTable("user_notes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  lessonId: varchar("lesson_id").references(() => lessons.id),
+  moduleId: varchar("module_id").references(() => trainingModules.id),
+  trackId: varchar("track_id").references(() => trainingTracks.id),
+  noteType: varchar("note_type").notNull(), // lesson, module, track, general
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// VAPI Agent configurations per company
+export const vapiAgents = pgTable("vapi_agents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").references(() => companies.id).notNull(),
+  agentName: varchar("agent_name").notNull().default("Coach Betty"),
+  vapiApiKey: text("vapi_api_key"),
+  vapiPhoneNumber: varchar("vapi_phone_number"),
+  voiceId: varchar("voice_id").default("6aDn1KB0hjpdcocrUkmq"), // 11labs voice ID
+  model: varchar("model").default("gpt-4o-mini"), // OpenAI model
+  systemPrompt: text("system_prompt"), // Custom system prompt with company knowledge
+  companyKnowledge: text("company_knowledge"), // Company-specific knowledge base
+  scriptContent: text("script_content"), // Training script content
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -194,8 +251,14 @@ export const callScoringRubric = pgTable("call_scoring_rubric", {
 });
 
 // Relations
+export const companyRelations = relations(companies, ({ many }) => ({
+  users: many(users),
+  vapiAgents: many(vapiAgents),
+}));
+
 export const trackRelations = relations(trainingTracks, ({ many }) => ({
   modules: many(trainingModules),
+  userNotes: many(userNotes),
 }));
 
 export const moduleRelations = relations(trainingModules, ({ one, many }) => ({
@@ -205,6 +268,7 @@ export const moduleRelations = relations(trainingModules, ({ one, many }) => ({
   }),
   lessons: many(lessons),
   questions: many(quizQuestions),
+  userNotes: many(userNotes),
 }));
 
 export const lessonRelations = relations(lessons, ({ one, many }) => ({
@@ -213,14 +277,47 @@ export const lessonRelations = relations(lessons, ({ one, many }) => ({
     references: [trainingModules.id],
   }),
   questions: many(quizQuestions),
+  userNotes: many(userNotes),
 }));
 
-export const userRelations = relations(users, ({ many }) => ({
+export const userNotesRelations = relations(userNotes, ({ one }) => ({
+  user: one(users, {
+    fields: [userNotes.userId],
+    references: [users.id],
+  }),
+  lesson: one(lessons, {
+    fields: [userNotes.lessonId],
+    references: [lessons.id],
+  }),
+  module: one(trainingModules, {
+    fields: [userNotes.moduleId],
+    references: [trainingModules.id],
+  }),
+  track: one(trainingTracks, {
+    fields: [userNotes.trackId],
+    references: [trainingTracks.id],
+  }),
+}));
+
+export const vapiAgentRelations = relations(vapiAgents, ({ one }) => ({
+  company: one(companies, {
+    fields: [vapiAgents.companyId],
+    references: [companies.id],
+  }),
+}));
+
+export const userRelations = relations(users, ({ one, many }) => ({
+  company: one(companies, {
+    fields: [users.companyId],
+    references: [companies.id],
+  }),
   progress: many(userProgress),
   certifications: many(userCertifications),
   callRecordings: many(callRecordings),
   performanceMetrics: many(performanceMetrics),
   scriptLibrary: many(scriptLibrary),
+  notes: many(userNotes),
+  conversations: many(chatConversations),
 }));
 
 // Phone training relations
@@ -269,7 +366,27 @@ export const callScoringRubricRelations = relations(callScoringRubric, ({ one })
 }));
 
 // Insert schemas
+export const insertCompanySchema = createInsertSchema(companies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  activeUserCount: true,
+  nextBillingDate: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserNoteSchema = createInsertSchema(userNotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVapiAgentSchema = createInsertSchema(vapiAgents).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -327,9 +444,15 @@ export const insertCallScoringRubricSchema = createInsertSchema(callScoringRubri
 });
 
 // Types
+export type Company = typeof companies.$inferSelect;
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UserNote = typeof userNotes.$inferSelect;
+export type InsertUserNote = z.infer<typeof insertUserNoteSchema>;
+export type VapiAgent = typeof vapiAgents.$inferSelect;
+export type InsertVapiAgent = z.infer<typeof insertVapiAgentSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type CreateUserData = z.infer<typeof createUserByAdminSchema>;
 export type TrainingTrack = typeof trainingTracks.$inferSelect;
@@ -404,3 +527,8 @@ export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 
 export type InsertProgress = z.infer<typeof insertProgressSchema>;
 export type QuizResponse = z.infer<typeof insertQuizResponseSchema>;
+
+// Additional helper types
+export type UserRole = 'super_admin' | 'admin' | 'user';
+export type SubscriptionStatus = 'trial' | 'active' | 'suspended' | 'cancelled';
+export type SubscriptionPlan = 'basic' | 'pro' | 'enterprise';
