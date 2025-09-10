@@ -884,6 +884,80 @@ export async function createComprehensiveTrainingData() {
     totalLessons: 3
   }).returning();
   
+  await db.insert(lessons).values([
+    {
+      moduleId: residentialModule5.id,
+      title: 'First Impressions Matter',
+      content: `<h1>First Impressions Matter</h1>
+        <div class="bg-pink-50 p-6 rounded-lg mb-6">
+          <h2>You Never Get a Second Chance</h2>
+          <p>The first 30 seconds of interaction set the tone for the entire relationship.</p>
+        </div>
+        
+        <h2>Before the Door Opens</h2>
+        <ul>
+          <li>Park professionally (not blocking driveway)</li>
+          <li>Wear clean, professional attire with ID badge</li>
+          <li>Have materials organized and ready</li>
+          <li>Turn off vehicle and music</li>
+          <li>Approach with confidence and smile</li>
+        </ul>
+        
+        <h2>The Professional Introduction</h2>
+        <ul>
+          <li>Ring doorbell once, step back 3-4 feet</li>
+          <li>Smile and make eye contact</li>
+          <li>Clear, friendly greeting</li>
+          <li>State your name and company</li>
+          <li>Confirm appointment and purpose</li>
+          <li>Ask permission to proceed</li>
+        </ul>`,
+      orderIndex: 1,
+      estimatedMinutes: 20
+    },
+    {
+      moduleId: residentialModule5.id,
+      title: 'Communication Excellence',
+      content: `<h1>Communication Excellence</h1>
+        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+          <h2>Master Communicators Win More Business</h2>
+          <p>Clear, professional communication builds trust and closes deals.</p>
+        </div>
+        
+        <h2>Active Listening Techniques</h2>
+        <ul>
+          <li>Maintain appropriate eye contact</li>
+          <li>Nod and use verbal confirmations</li>
+          <li>Take notes on key points</li>
+          <li>Ask clarifying questions</li>
+          <li>Summarize what you heard</li>
+          <li>Never interrupt</li>
+        </ul>`,
+      orderIndex: 2,
+      estimatedMinutes: 25
+    },
+    {
+      moduleId: residentialModule5.id,
+      title: 'Following Up for Success',
+      content: `<h1>Following Up for Success</h1>
+        <div class="bg-green-50 p-6 rounded-lg mb-6">
+          <h2>The Fortune is in the Follow-Up</h2>
+          <p>Consistent follow-up separates professionals from amateurs.</p>
+        </div>
+        
+        <h2>Immediate Follow-Up (24 Hours)</h2>
+        <ul>
+          <li>Send thank you message</li>
+          <li>Email proposal as promised</li>
+          <li>Include any requested information</li>
+          <li>Confirm next steps</li>
+          <li>Provide your direct contact</li>
+        </ul>`,
+      orderIndex: 3,
+      estimatedMinutes: 20
+    }
+  ]);
+  
   // Module 6: Installation Process
   const [residentialModule6] = await db.insert(trainingModules).values({
     trackId: residentialTrack.id,
@@ -893,6 +967,71 @@ export async function createComprehensiveTrainingData() {
     orderIndex: 6,
     totalLessons: 3
   }).returning();
+  
+  await db.insert(lessons).values([
+    {
+      moduleId: residentialModule6.id,
+      title: 'Installation Standards',
+      content: `<h1>Installation Standards</h1>
+        <div class="bg-orange-50 p-6 rounded-lg mb-6">
+          <h2>Quality Installation = Happy Customers</h2>
+          <p>Understanding proper installation ensures you can confidently sell and deliver quality.</p>
+        </div>
+        
+        <h2>Pre-Installation Requirements</h2>
+        <ul>
+          <li>Permits obtained and posted</li>
+          <li>Materials delivered and inspected</li>
+          <li>Dumpster properly placed</li>
+          <li>Property protection in place</li>
+          <li>Weather forecast checked</li>
+          <li>Crew briefed on scope</li>
+        </ul>`,
+      orderIndex: 1,
+      estimatedMinutes: 25
+    },
+    {
+      moduleId: residentialModule6.id,
+      title: 'Common Installation Mistakes',
+      content: `<h1>Common Installation Mistakes</h1>
+        <div class="bg-red-50 p-6 rounded-lg mb-6">
+          <h2>Learn from Others' Mistakes</h2>
+          <p>Knowing common errors helps you ensure quality and avoid callbacks.</p>
+        </div>
+        
+        <h2>Ventilation Mistakes</h2>
+        <ul>
+          <li>Insufficient intake ventilation</li>
+          <li>Blocked soffit vents</li>
+          <li>Mixing ventilation types</li>
+          <li>Short-circuiting airflow</li>
+          <li>Not calculating proper ratios</li>
+        </ul>`,
+      orderIndex: 2,
+      estimatedMinutes: 20
+    },
+    {
+      moduleId: residentialModule6.id,
+      title: 'Job Site Management',
+      content: `<h1>Job Site Management</h1>
+        <div class="bg-purple-50 p-6 rounded-lg mb-6">
+          <h2>Professional Job Sites Build Trust</h2>
+          <p>How the job site is managed reflects on your company's professionalism.</p>
+        </div>
+        
+        <h2>Property Protection</h2>
+        <ul>
+          <li>Tarps for landscaping</li>
+          <li>Plywood over windows</li>
+          <li>Cover AC units</li>
+          <li>Protect pool/spa</li>
+          <li>Move outdoor furniture</li>
+          <li>Document pre-existing damage</li>
+        </ul>`,
+      orderIndex: 3,
+      estimatedMinutes: 20
+    }
+  ]);
   
   // Module 7: Financing Options
   const [residentialModule7] = await db.insert(trainingModules).values({
@@ -904,6 +1043,50 @@ export async function createComprehensiveTrainingData() {
     totalLessons: 2
   }).returning();
   
+  await db.insert(lessons).values([
+    {
+      moduleId: residentialModule7.id,
+      title: 'Financing Solutions',
+      content: `<h1>Financing Solutions</h1>
+        <div class="bg-green-50 p-6 rounded-lg mb-6">
+          <h2>Make It Affordable</h2>
+          <p>Financing options help more customers say yes to needed repairs.</p>
+        </div>
+        
+        <h2>Why Offer Financing</h2>
+        <ul>
+          <li>Increases closing rate by 30-40%</li>
+          <li>Higher average tickets</li>
+          <li>Helps customers in emergencies</li>
+          <li>Competitive advantage</li>
+          <li>Faster decision making</li>
+        </ul>`,
+      orderIndex: 1,
+      estimatedMinutes: 20
+    },
+    {
+      moduleId: residentialModule7.id,
+      title: 'Insurance Claim Assistance',
+      content: `<h1>Insurance Claim Assistance</h1>
+        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+          <h2>Be Their Insurance Advocate</h2>
+          <p>Helping with insurance claims provides value and builds trust.</p>
+        </div>
+        
+        <h2>How We Help With Claims</h2>
+        <ul>
+          <li>Free inspection and documentation</li>
+          <li>Meet with adjusters</li>
+          <li>Provide detailed estimates</li>
+          <li>Handle supplements</li>
+          <li>Work within insurance scope</li>
+          <li>Only collect deductible</li>
+        </ul>`,
+      orderIndex: 2,
+      estimatedMinutes: 20
+    }
+  ]);
+  
   // Module 8: Building Your Business
   const [residentialModule8] = await db.insert(trainingModules).values({
     trackId: residentialTrack.id,
@@ -913,6 +1096,71 @@ export async function createComprehensiveTrainingData() {
     orderIndex: 8,
     totalLessons: 3
   }).returning();
+  
+  await db.insert(lessons).values([
+    {
+      moduleId: residentialModule8.id,
+      title: 'Lead Generation Strategies',
+      content: `<h1>Lead Generation Strategies</h1>
+        <div class="bg-yellow-50 p-6 rounded-lg mb-6">
+          <h2>Consistent Leads = Consistent Income</h2>
+          <p>Master multiple lead generation methods to keep your pipeline full.</p>
+        </div>
+        
+        <h2>Door-to-Door Canvassing</h2>
+        <ul>
+          <li>Target storm-damaged areas</li>
+          <li>Work in teams for safety</li>
+          <li>Professional appearance always</li>
+          <li>Have clear talking points</li>
+          <li>Leave professional materials</li>
+          <li>Follow up on interests immediately</li>
+        </ul>`,
+      orderIndex: 1,
+      estimatedMinutes: 25
+    },
+    {
+      moduleId: residentialModule8.id,
+      title: 'Building Your Reputation',
+      content: `<h1>Building Your Reputation</h1>
+        <div class="bg-purple-50 p-6 rounded-lg mb-6">
+          <h2>Your Reputation is Everything</h2>
+          <p>A strong reputation makes selling easier and generates automatic referrals.</p>
+        </div>
+        
+        <h2>Online Reviews Strategy</h2>
+        <ul>
+          <li>Ask at the point of maximum happiness</li>
+          <li>Make it easy with links</li>
+          <li>Guide them on what to write</li>
+          <li>Respond to all reviews</li>
+          <li>Address negative reviews professionally</li>
+          <li>Showcase reviews everywhere</li>
+        </ul>`,
+      orderIndex: 2,
+      estimatedMinutes: 20
+    },
+    {
+      moduleId: residentialModule8.id,
+      title: 'Goal Setting and Success',
+      content: `<h1>Goal Setting and Success</h1>
+        <div class="bg-green-50 p-6 rounded-lg mb-6">
+          <h2>Success Doesn't Happen by Accident</h2>
+          <p>Set clear goals and work your plan to achieve the success you deserve.</p>
+        </div>
+        
+        <h2>Setting SMART Goals</h2>
+        <ul>
+          <li><strong>Specific:</strong> Clear and defined</li>
+          <li><strong>Measurable:</strong> Track progress</li>
+          <li><strong>Achievable:</strong> Realistic targets</li>
+          <li><strong>Relevant:</strong> Aligned with values</li>
+          <li><strong>Time-bound:</strong> Clear deadlines</li>
+        </ul>`,
+      orderIndex: 3,
+      estimatedMinutes: 20
+    }
+  ]);
   
   // COMMERCIAL ROOFING MODULES
   
@@ -1535,6 +1783,134 @@ export async function createComprehensiveTrainingData() {
     }
   ]);
   
+  // Module 2-8 for Commercial Track
+  const [commercialModule2] = await db.insert(trainingModules).values({
+    trackId: commercialTrack.id,
+    title: 'Commercial Sales Process',
+    description: 'Master B2B sales for commercial roofing projects',
+    icon: 'trending-up',
+    orderIndex: 2,
+    totalLessons: 3
+  }).returning();
+  
+  const [commercialModule3] = await db.insert(trainingModules).values({
+    trackId: commercialTrack.id,
+    title: 'Commercial Project Management',
+    description: 'Execute large-scale commercial roofing projects successfully',
+    icon: 'clipboard-list',
+    orderIndex: 3,
+    totalLessons: 3
+  }).returning();
+  
+  const [commercialModule4] = await db.insert(trainingModules).values({
+    trackId: commercialTrack.id,
+    title: 'Maintenance Programs',
+    description: 'Develop profitable commercial maintenance contracts',
+    icon: 'tool',
+    orderIndex: 4,
+    totalLessons: 2
+  }).returning();
+  
+  const [commercialModule5] = await db.insert(trainingModules).values({
+    trackId: commercialTrack.id,
+    title: 'Energy Efficiency Solutions',
+    description: 'Cool roofs, solar, and energy savings opportunities',
+    icon: 'sun',
+    orderIndex: 5,
+    totalLessons: 2
+  }).returning();
+  
+  const [commercialModule6] = await db.insert(trainingModules).values({
+    trackId: commercialTrack.id,
+    title: 'Commercial Warranties',
+    description: 'Understanding and selling commercial warranty programs',
+    icon: 'shield',
+    orderIndex: 6,
+    totalLessons: 2
+  }).returning();
+  
+  const [commercialModule7] = await db.insert(trainingModules).values({
+    trackId: commercialTrack.id,
+    title: 'Emergency Services',
+    description: '24/7 emergency response for commercial clients',
+    icon: 'alert-circle',
+    orderIndex: 7,
+    totalLessons: 2
+  }).returning();
+  
+  const [commercialModule8] = await db.insert(trainingModules).values({
+    trackId: commercialTrack.id,
+    title: 'Building Commercial Relationships',
+    description: 'Long-term partnerships and account management',
+    icon: 'handshake',
+    orderIndex: 8,
+    totalLessons: 2
+  }).returning();
+  
+  // Module 2-8 for Restoration Track
+  const [restorationModule2] = await db.insert(trainingModules).values({
+    trackId: restorationTrack.id,
+    title: 'Storm Damage Assessment',
+    description: 'Identify and document all types of storm damage',
+    icon: 'cloud-lightning',
+    orderIndex: 2,
+    totalLessons: 3
+  }).returning();
+  
+  const [restorationModule3] = await db.insert(trainingModules).values({
+    trackId: restorationTrack.id,
+    title: 'Xactimate Mastery',
+    description: 'Create accurate estimates using industry-standard software',
+    icon: 'calculator',
+    orderIndex: 3,
+    totalLessons: 3
+  }).returning();
+  
+  const [restorationModule4] = await db.insert(trainingModules).values({
+    trackId: restorationTrack.id,
+    title: 'Supplement Strategies',
+    description: 'Get paid for all necessary work through proper supplements',
+    icon: 'file-plus',
+    orderIndex: 4,
+    totalLessons: 2
+  }).returning();
+  
+  const [restorationModule5] = await db.insert(trainingModules).values({
+    trackId: restorationTrack.id,
+    title: 'Emergency Tarping',
+    description: 'Provide immediate protection and secure the job',
+    icon: 'umbrella',
+    orderIndex: 5,
+    totalLessons: 2
+  }).returning();
+  
+  const [restorationModule6] = await db.insert(trainingModules).values({
+    trackId: restorationTrack.id,
+    title: 'Water Damage Restoration',
+    description: 'Handle interior damage from roof leaks',
+    icon: 'droplet',
+    orderIndex: 6,
+    totalLessons: 2
+  }).returning();
+  
+  const [restorationModule7] = await db.insert(trainingModules).values({
+    trackId: restorationTrack.id,
+    title: 'Large Loss Projects',
+    description: 'Manage catastrophic damage and complex claims',
+    icon: 'building',
+    orderIndex: 7,
+    totalLessons: 2
+  }).returning();
+  
+  const [restorationModule8] = await db.insert(trainingModules).values({
+    trackId: restorationTrack.id,
+    title: 'Customer Advocacy',
+    description: 'Help customers navigate the insurance process',
+    icon: 'heart-handshake',
+    orderIndex: 8,
+    totalLessons: 2
+  }).returning();
+  
   // Create quiz questions for each module
   await createQuizQuestions([
     residentialModule1.id,
@@ -1546,7 +1922,21 @@ export async function createComprehensiveTrainingData() {
     residentialModule7.id,
     residentialModule8.id,
     commercialModule1.id,
-    restorationModule1.id
+    commercialModule2.id,
+    commercialModule3.id,
+    commercialModule4.id,
+    commercialModule5.id,
+    commercialModule6.id,
+    commercialModule7.id,
+    commercialModule8.id,
+    restorationModule1.id,
+    restorationModule2.id,
+    restorationModule3.id,
+    restorationModule4.id,
+    restorationModule5.id,
+    restorationModule6.id,
+    restorationModule7.id,
+    restorationModule8.id
   ]);
   
   console.log('Comprehensive roofing training curriculum created successfully!');
