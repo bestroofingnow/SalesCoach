@@ -88,6 +88,9 @@ interface VapiConfig {
   model?: string;
 }
 
+// VAPI Door to Door Training Assistant ID (provided by user)
+const DOOR_TO_DOOR_ASSISTANT_ID = 'd2794e4d-af9a-4fe3-8f56-2ebd781d2c6a';
+
 export class VapiService {
   private baseUrl = 'https://api.vapi.ai/v1';
   
@@ -105,9 +108,11 @@ export class VapiService {
         }
         
         // Create new agent with default configuration
+        // Note: Using pre-configured VAPI assistant ID: d2794e4d-af9a-4fe3-8f56-2ebd781d2c6a
         agent = await storage.createVapiAgent({
           companyId,
-          agentName: 'Coach Betty',
+          agentName: 'Coach Betty (Door to Door Training)',
+          vapiAssistantId: DOOR_TO_DOOR_ASSISTANT_ID, // Store the assistant ID
           voiceId: '6aDn1KB0hjpdcocrUkmq', // 11labs voice ID from user
           model: 'gpt-4o-mini', // OpenAI model from user
           systemPrompt: this.buildSystemPrompt(company),
@@ -221,14 +226,10 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
     }
     
     try {
-      // First create or get the assistant
-      const assistant = await this.createVapiAssistant(agent);
-      if (!assistant) {
-        console.error('Failed to create assistant');
-        return null;
-      }
+      // Use the existing Door to Door Training Assistant ID
+      console.log('Starting VAPI call with assistant ID:', DOOR_TO_DOOR_ASSISTANT_ID);
       
-      // Start the phone call
+      // Start the phone call with the pre-configured assistant
       const response = await fetch(`${this.baseUrl}/calls`, {
         method: 'POST',
         headers: {
@@ -236,7 +237,7 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          assistantId: assistant.id,
+          assistantId: DOOR_TO_DOOR_ASSISTANT_ID, // Use the hardcoded assistant ID for Door to Door Training
           customer: {
             number: phoneNumber
           },
