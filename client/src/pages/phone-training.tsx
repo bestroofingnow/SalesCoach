@@ -33,36 +33,54 @@ export default function PhoneTraining() {
 
   useEffect(() => {
     // Add Vapi widget to the page on mount
-    const vapiWidgetExists = document.querySelector('vapi-widget');
-    if (!vapiWidgetExists) {
-      const vapiWidget = document.createElement('div');
-      vapiWidget.innerHTML = `
-        <vapi-widget
-          public-key="c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2"
-          assistant-id="d2794e4d-af9a-4fe3-8f56-2ebd781d2c6a"
-          mode="voice"
-          theme="dark"
-          base-bg-color="#000000"
-          accent-color="#14B8A6"
-          cta-button-color="#000000"
-          cta-button-text-color="#ffffff"
-          border-radius="large"
-          size="full"
-          position="bottom-right"
-          title="TALK WITH AI"
-          start-button-text="Start"
-          end-button-text="End Call"
-          cta-title="PRACTICE CALLS"
-          chat-first-message="Hey, How can I help you today?"
-          chat-placeholder="Type your message..."
-          voice-show-transcript="true"
-          consent-required="true"
-          consent-title="Terms and conditions"
-          consent-content="By clicking &quot;Agree,&quot; and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as otherwise described in our Terms of Service."
-          consent-storage-key="vapi_widget_consent"
-        ></vapi-widget>
-      `;
-      document.body.appendChild(vapiWidget);
+    const addVapiWidget = () => {
+      const vapiWidgetExists = document.querySelector('vapi-widget');
+      if (!vapiWidgetExists) {
+        const vapiWidget = document.createElement('div');
+        vapiWidget.innerHTML = `
+          <vapi-widget
+            public-key="c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2"
+            assistant-id="d2794e4d-af9a-4fe3-8f56-2ebd781d2c6a"
+            mode="voice"
+            theme="dark"
+            base-bg-color="#000000"
+            accent-color="#14B8A6"
+            cta-button-color="#000000"
+            cta-button-text-color="#ffffff"
+            border-radius="large"
+            size="full"
+            position="bottom-right"
+            title="TALK WITH AI"
+            start-button-text="Start"
+            end-button-text="End Call"
+            cta-title="PRACTICE CALLS"
+            chat-first-message="Hey, How can I help you today?"
+            chat-placeholder="Type your message..."
+            voice-show-transcript="true"
+            consent-required="true"
+            consent-title="Terms and conditions"
+            consent-content="By clicking &quot;Agree,&quot; and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as otherwise described in our Terms of Service."
+            consent-storage-key="vapi_widget_consent"
+            style="display: none;"
+          ></vapi-widget>
+        `;
+        document.body.appendChild(vapiWidget);
+      }
+    };
+    
+    // Wait for VAPI library to load
+    if ((window as any).vapiLoaded) {
+      addVapiWidget();
+    } else {
+      const checkInterval = setInterval(() => {
+        if ((window as any).vapiLoaded) {
+          clearInterval(checkInterval);
+          addVapiWidget();
+        }
+      }, 100);
+      
+      // Timeout after 5 seconds
+      setTimeout(() => clearInterval(checkInterval), 5000);
     }
   }, []);
 
@@ -104,26 +122,46 @@ export default function PhoneTraining() {
                     size="lg"
                     className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3"
                     onClick={() => {
-                      // Trigger the Vapi widget - try multiple methods
-                      const vapiWidget = document.querySelector('vapi-widget') as any;
-                      if (vapiWidget) {
-                        // Try to click the CTA button if it exists
-                        if (vapiWidget.shadowRoot) {
-                          const ctaButton = vapiWidget.shadowRoot.querySelector('[data-testid="cta-button"], .vapi-cta-button, button');
-                          if (ctaButton) {
-                            ctaButton.click();
-                            return;
+                      // Wait for VAPI to be loaded and trigger the widget
+                      const checkAndTrigger = () => {
+                        const vapiWidget = document.querySelector('vapi-widget') as any;
+                        if (vapiWidget) {
+                          // Try multiple methods to trigger the widget
+                          if (vapiWidget.shadowRoot) {
+                            // Try to find and click internal buttons
+                            const buttons = vapiWidget.shadowRoot.querySelectorAll('button');
+                            for (const button of buttons) {
+                              if (button.textContent?.includes('Start') || 
+                                  button.textContent?.includes('TALK') ||
+                                  button.className?.includes('cta')) {
+                                button.click();
+                                return;
+                              }
+                            }
                           }
-                        }
-                        // Try to call the widget's methods directly
-                        if (typeof vapiWidget.open === 'function') {
-                          vapiWidget.open();
-                        } else if (typeof vapiWidget.start === 'function') {
-                          vapiWidget.start();
+                          // Try methods directly
+                          if (typeof vapiWidget.open === 'function') {
+                            vapiWidget.open();
+                          } else if (typeof vapiWidget.start === 'function') {
+                            vapiWidget.start();
+                          } else if (typeof vapiWidget.startCall === 'function') {
+                            vapiWidget.startCall();
+                          } else {
+                            // Try dispatching events
+                            vapiWidget.dispatchEvent(new Event('click'));
+                            vapiWidget.dispatchEvent(new CustomEvent('vapi:start'));
+                          }
                         } else {
-                          // Fallback: dispatch a custom event
-                          vapiWidget.dispatchEvent(new Event('click'));
+                          console.error('VAPI widget not found');
                         }
+                      };
+                      
+                      // Check if widget is loaded
+                      if ((window as any).vapiLoaded) {
+                        checkAndTrigger();
+                      } else {
+                        // Wait for widget to load
+                        setTimeout(checkAndTrigger, 1000);
                       }
                     }}
                     data-testid="button-start-ai-practice"

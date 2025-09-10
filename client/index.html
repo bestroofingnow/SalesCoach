@@ -5,11 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Vapi Widget Script -->
-    <script
-      src="https://unpkg.com/@vapi-ai/client-sdk-react/dist/embed/widget.umd.js"
-      async
-      type="text/javascript"
-    ></script>
+    <script async src="https://unpkg.com/@vapi-ai/vanilla-client@2.5.0/dist/vapi.min.js"></script>
+    <script>
+      window.vapiLoaded = false;
+      window.addEventListener('load', () => {
+        if (!window.customElements.get('vapi-widget')) {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js';
+          script.defer = true;
+          script.type = 'module';
+          document.body.appendChild(script);
+          script.onload = () => {
+            window.vapiLoaded = true;
+            console.log('VAPI widget loaded');
+          };
+        } else {
+          window.vapiLoaded = true;
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
