@@ -16,7 +16,7 @@ export function VapiPractice({ scenarioType = 'cold-call', moduleId }: VapiPract
       widgetContainerRef.current.innerHTML = `
         <vapi-widget
           public-key="c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2"
-          assistant-id="9fb2d481-9e44-427e-aab3-c88a89ab2b1a"
+          assistant-id="d2794e4d-af9a-4fe3-8f56-2ebd781d2c6a"
           mode="voice"
           theme="dark"
           base-bg-color="#000000"
