@@ -45,8 +45,12 @@ export default function Login() {
         description: "You have successfully logged in.",
       });
       
-      // Redirect to dashboard
-      setLocation("/");
+      // Redirect based on user role
+      if (result.user?.role === 'super_admin') {
+        setLocation("/admin");
+      } else {
+        setLocation("/dashboard");
+      }
     } catch (error) {
       toast({
         title: "Login failed",
@@ -66,7 +70,7 @@ export default function Login() {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
             <CardDescription>
-              Sign in to your BRN Training Academy account
+              Sign in to your Roofing Training Academy account
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -81,8 +85,9 @@ export default function Login() {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="your.email@bestroofingnow.com"
+                          placeholder="your@email.com"
                           {...field}
+                          data-testid="input-email"
                         />
                       </FormControl>
                       <FormMessage />
@@ -100,6 +105,7 @@ export default function Login() {
                           type="password"
                           placeholder="Enter your password"
                           {...field}
+                          data-testid="input-password"
                         />
                       </FormControl>
                       <FormMessage />
@@ -110,6 +116,7 @@ export default function Login() {
                   type="submit"
                   className="w-full"
                   disabled={isLoading}
+                  data-testid="button-login"
                 >
                   {isLoading ? (
                     <>
@@ -128,7 +135,7 @@ export default function Login() {
         {/* Hero Section */}
         <div className="hidden md:block text-center md:text-left">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            BRN Training Academy
+            Roofing Training Academy
           </h1>
           <p className="text-xl text-gray-700 mb-6">
             Master the art of roofing excellence with our comprehensive training platform
@@ -147,10 +154,23 @@ export default function Login() {
               <span>Restoration & Insurance Claims</span>
             </div>
           </div>
-          <div className="mt-8 p-4 bg-white/50 rounded-lg backdrop-blur">
-            <p className="text-sm text-gray-600">
-              <strong>Note:</strong> If you're a new team member, please contact your admin to create your account.
-            </p>
+          <div className="mt-8 space-y-3">
+            <div className="p-4 bg-white/50 rounded-lg backdrop-blur">
+              <p className="text-sm text-gray-600">
+                <strong>Note:</strong> If you're a new team member, please contact your admin to create your account.
+              </p>
+            </div>
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-gray-700 font-medium mb-2">Demo Accounts:</p>
+              <p className="text-xs text-gray-600">
+                <strong>Super Admin:</strong> superadmin@roofingacademy.com<br />
+                Password: .1yzv3i84geiIR36P6
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                <strong>Company Admin:</strong> admin@demo.com<br />
+                Password: 0.vlsuwgwsltDIJXMM
+              </p>
+            </div>
           </div>
         </div>
       </div>
