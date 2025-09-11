@@ -333,7 +333,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to start phone call" });
     }
   });
+
+  // VAPI web call endpoint for browser-based voice training
+  app.post('/api/vapi/start-web-call', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      const companyId = req.user?.companyId;
+      
+      if (!userId || !companyId) {
+        return res.status(401).json({ message: "User not authenticated or company not found" });
+      }
+      
+      // Get or create VAPI agent for the company
+      const agent = await vapiService.getOrCreateVapiAgent(companyId);
+      if (!agent) {
+        return res.status(500).json({ message: "Failed to get VAPI agent configuration" });
+      }
+      
+      // Start the web call for training
+      const callResult = await vapiService.startWebCall(agent, userId);
+      
+      if (callResult?.error) {
+        return res.status(500).json({ 
+          message: "Failed to start web call", 
+          error: callResult.error,
+          details: callResult.details
+        });
+      }
+      
+      res.json({
+        message: "Web call started successfully",
+        call: callResult,
+        assistantId: agent.vapiAssistantId || 'd2794e4d-af9a-4fe3-8f56-2ebd781d2c6a',
+        publicKey: 'c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2' // Public key for widget integration
+      });
+      
+    } catch (error) {
+      console.error("Error starting web call:", error);
+      res.status(500).json({ message: "Failed to start web call" });
+    }
+  });
   
+
+  // VAPI call termination endpoint
+  app.delete("/api/vapi/calls/:callId", authMiddleware, async (req: any, res) => {
+    try {
+      const { callId } = req.params;
+      
+      if (!callId) {
+        return res.status(400).json({ message: "Call ID is required" });
+      }
+      
+      const success = await vapiService.endCall(callId);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to end call" });
+      }
+      
+      res.json({ message: "Call ended successfully", callId });
+    } catch (error) {
+      console.error("Error ending VAPI call:", error);
+      res.status(500).json({ message: "Failed to end call" });
+    }
+  });
   app.put('/api/vapi/agent/:agentId', authMiddleware, companyAdminMiddleware, async (req: any, res) => {
     try {
       const { agentId } = req.params;

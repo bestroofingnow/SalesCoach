@@ -85,6 +85,7 @@ export const vapiAgents = pgTable("vapi_agents", {
   agentName: varchar("agent_name").notNull().default("Coach Betty"),
   vapiApiKey: text("vapi_api_key"),
   vapiPhoneNumber: varchar("vapi_phone_number"),
+  vapiAssistantId: varchar("vapi_assistant_id"), // VAPI Assistant ID for web calls
   voiceId: varchar("voice_id").default("6aDn1KB0hjpdcocrUkmq"), // 11labs voice ID
   model: varchar("model").default("gpt-4o-mini"), // OpenAI model
   systemPrompt: text("system_prompt"), // Custom system prompt with company knowledge

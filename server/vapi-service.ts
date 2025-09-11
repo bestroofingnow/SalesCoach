@@ -265,6 +265,88 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
     }
   }
   
+  async startWebCall(agent: VapiAgent, userId?: string): Promise<any> {
+    // Use the VAPI API key from environment
+    const vapiApiKey = process.env.VAPI_API_KEY;
+    
+    if (!vapiApiKey) {
+      console.error('VAPI_API_KEY environment variable not configured');
+      return { error: 'VAPI API key not configured' };
+    }
+    
+    try {
+      // Use the existing Door to Door Training Assistant ID
+      console.log('Starting VAPI web call with assistant ID:', DOOR_TO_DOOR_ASSISTANT_ID);
+      
+      // Start the web call with the pre-configured assistant
+      const response = await fetch(`${this.baseUrl}/calls`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${vapiApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'webCall', // Specify web call type
+          assistantId: agent.vapiAssistantId || DOOR_TO_DOOR_ASSISTANT_ID, // Use stored assistant ID or fallback
+          metadata: {
+            userId: userId,
+            trainingSession: true,
+            timestamp: new Date().toISOString()
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to start web call:', errorText);
+        return { error: 'Failed to start web call', details: errorText };
+      }
+      
+      const callData = await response.json();
+      console.log('Web call started successfully:', callData);
+      return callData;
+    } catch (error) {
+      console.error('Error starting web call:', error);
+      return { 
+        error: 'Error starting web call', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  }
+  
+  async endCall(callId: string): Promise<boolean> {
+    const vapiApiKey = process.env.VAPI_API_KEY;
+    
+    if (!vapiApiKey) {
+      console.error('VAPI_API_KEY environment variable not configured');
+      return false;
+    }
+    
+    try {
+      console.log('Ending VAPI call with ID:', callId);
+      
+      const response = await fetch(`${this.baseUrl}/calls/${callId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${vapiApiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Failed to end VAPI call:', error);
+        return false;
+      }
+      
+      console.log('VAPI call ended successfully:', callId);
+      return true;
+    } catch (error) {
+      console.error('Error ending VAPI call:', error);
+      return false;
+    }
+  }
+  
   async updateAgentConfiguration(
     agentId: string, 
     config: Partial<VapiAgent>

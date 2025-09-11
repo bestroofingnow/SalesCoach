@@ -1,0 +1,22 @@
+
+  // VAPI call termination endpoint
+  app.delete('/api/vapi/calls/:callId', authMiddleware, async (req: any, res) => {
+    try {
+      const { callId } = req.params;
+      
+      if (!callId) {
+        return res.status(400).json({ message: "Call ID is required" });
+      }
+      
+      const success = await vapiService.endCall(callId);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to end call" });
+      }
+      
+      res.json({ message: "Call ended successfully", callId });
+    } catch (error) {
+      console.error("Error ending VAPI call:", error);
+      res.status(500).json({ message: "Failed to end call" });
+    }
+  });
