@@ -966,6 +966,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Phone Training Scripts API
+  app.get('/api/phone-training/scripts', authMiddleware, async (req: any, res) => {
+    try {
+      const { category, leadType } = req.query;
+      
+      // Validate query parameters
+      const validCategories = ['all', 'opening', 'objection_response', 'closing', 'storm_specific', 'aged_roof'];
+      const validLeadTypes = ['all', 'storm_lead', 'aged_roof', 'referral', 'cold_lead', 'all_leads'];
+      
+      if (category && !validCategories.includes(category)) {
+        return res.status(400).json({ 
+          message: "Invalid category", 
+          validCategories 
+        });
+      }
+      
+      if (leadType && !validLeadTypes.includes(leadType)) {
+        return res.status(400).json({ 
+          message: "Invalid leadType", 
+          validLeadTypes 
+        });
+      }
+      
+      // Use combined filtering method
+      const filters: { category?: string; leadType?: string } = {};
+      if (category) filters.category = category;
+      if (leadType) filters.leadType = leadType;
+      
+      const scripts = await storage.getScriptsFiltered(filters);
+      res.json(scripts);
+    } catch (error) {
+      console.error("Error fetching phone training scripts:", error);
+      res.status(500).json({ message: "Failed to fetch scripts" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

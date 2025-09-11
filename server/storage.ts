@@ -3,6 +3,7 @@ import {
   companies,
   userNotes,
   vapiAgents,
+  scriptLibrary,
   trainingTracks, 
   trainingModules, 
   lessons, 
@@ -20,6 +21,8 @@ import {
   type InsertUserNote,
   type VapiAgent,
   type InsertVapiAgent,
+  type ScriptLibrary,
+  type InsertScriptLibrary,
   type TrainingTrack, 
   type TrainingModule, 
   type Lesson, 
@@ -97,6 +100,14 @@ export interface IStorage {
   getVapiAgent(companyId: string): Promise<VapiAgent | undefined>;
   createVapiAgent(agentData: InsertVapiAgent): Promise<VapiAgent>;
   updateVapiAgent(id: string, agentData: Partial<VapiAgent>): Promise<VapiAgent | undefined>;
+  
+  // Script Library methods
+  getAllScripts(): Promise<ScriptLibrary[]>;
+  getScriptsByCategory(category: string): Promise<ScriptLibrary[]>;
+  getScriptsByLeadType(leadType: string): Promise<ScriptLibrary[]>;
+  getScriptsFiltered(filters: { category?: string; leadType?: string }): Promise<ScriptLibrary[]>;
+  createScript(scriptData: InsertScriptLibrary): Promise<ScriptLibrary>;
+  updateScript(id: string, scriptData: Partial<ScriptLibrary>): Promise<ScriptLibrary | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -538,6 +549,75 @@ export class DatabaseStorage implements IStorage {
       .where(eq(vapiAgents.id, id))
       .returning();
     return agent || undefined;
+  }
+
+  // Script Library methods
+  async getAllScripts(): Promise<ScriptLibrary[]> {
+    return await db
+      .select()
+      .from(scriptLibrary)
+      .where(eq(scriptLibrary.isActive, true))
+      .orderBy(scriptLibrary.category, scriptLibrary.title);
+  }
+
+  async getScriptsByCategory(category: string): Promise<ScriptLibrary[]> {
+    return await db
+      .select()
+      .from(scriptLibrary)
+      .where(and(
+        eq(scriptLibrary.category, category),
+        eq(scriptLibrary.isActive, true)
+      ))
+      .orderBy(scriptLibrary.title);
+  }
+
+  async getScriptsByLeadType(leadType: string): Promise<ScriptLibrary[]> {
+    return await db
+      .select()
+      .from(scriptLibrary)
+      .where(and(
+        eq(scriptLibrary.leadType, leadType),
+        eq(scriptLibrary.isActive, true)
+      ))
+      .orderBy(scriptLibrary.category, scriptLibrary.title);
+  }
+
+  async createScript(scriptData: InsertScriptLibrary): Promise<ScriptLibrary> {
+    const [script] = await db
+      .insert(scriptLibrary)
+      .values(scriptData)
+      .returning();
+    return script;
+  }
+
+  async getScriptsFiltered(filters: { category?: string; leadType?: string }): Promise<ScriptLibrary[]> {
+    const conditions = [eq(scriptLibrary.isActive, true)];
+    
+    if (filters.category && filters.category !== 'all') {
+      conditions.push(eq(scriptLibrary.category, filters.category));
+    }
+    
+    if (filters.leadType && filters.leadType !== 'all') {
+      conditions.push(eq(scriptLibrary.leadType, filters.leadType));
+    }
+    
+    return await db
+      .select()
+      .from(scriptLibrary)
+      .where(and(...conditions))
+      .orderBy(scriptLibrary.category, scriptLibrary.title);
+  }
+
+  async updateScript(id: string, scriptData: Partial<ScriptLibrary>): Promise<ScriptLibrary | undefined> {
+    const [script] = await db
+      .update(scriptLibrary)
+      .set({
+        ...scriptData,
+        updatedAt: sql`NOW()`
+      })
+      .where(eq(scriptLibrary.id, id))
+      .returning();
+    return script || undefined;
   }
 }
 

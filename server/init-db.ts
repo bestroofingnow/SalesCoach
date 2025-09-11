@@ -1,8 +1,9 @@
 import { db } from './db';
-import { companies, users, trainingTracks, trainingModules, lessons, quizQuestions } from '@shared/schema';
+import { companies, users, trainingTracks, trainingModules, lessons, quizQuestions, scriptLibrary } from '@shared/schema';
 import { hashPassword } from './auth';
 import { sql } from 'drizzle-orm';
 import { createComprehensiveTrainingData } from './training-data';
+import { PHONE_TRAINING_SCRIPTS } from './phone-script-data';
 
 export async function initializeDatabase() {
   try {
@@ -110,6 +111,14 @@ export async function initializeDatabase() {
       console.log('Training data already exists, skipping creation');
     }
     
+    // Check if we have phone training scripts, if not, create them
+    const scripts = await db.select().from(scriptLibrary).limit(1);
+    if (scripts.length === 0) {
+      await createPhoneTrainingScripts();
+    } else {
+      console.log('Phone training scripts already exist, skipping creation');
+    }
+    
     console.log('Database initialization complete');
   } catch (error) {
     console.error('Error initializing database:', error);
@@ -119,4 +128,17 @@ export async function initializeDatabase() {
 async function createInitialTrainingData() {
   // Use the comprehensive training data
   await createComprehensiveTrainingData();
+}
+
+async function createPhoneTrainingScripts() {
+  try {
+    console.log('Creating phone training scripts...');
+    
+    // Insert all phone training scripts
+    await db.insert(scriptLibrary).values(PHONE_TRAINING_SCRIPTS);
+    
+    console.log(`✅ Created ${PHONE_TRAINING_SCRIPTS.length} phone training scripts`);
+  } catch (error) {
+    console.error('Error creating phone training scripts:', error);
+  }
 }

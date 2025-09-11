@@ -12,29 +12,36 @@ import type { ScriptLibrary } from "@shared/schema";
 export default function ScriptLibrary() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedLeadType, setSelectedLeadType] = useState("all");
   const [selectedScript, setSelectedScript] = useState<ScriptLibrary | null>(null);
 
+  // Build dynamic query parameters for API
+  const queryParams = new URLSearchParams();
+  if (selectedCategory !== "all") queryParams.set("category", selectedCategory);
+  if (selectedLeadType !== "all") queryParams.set("leadType", selectedLeadType);
+  const queryString = queryParams.toString();
+
   const { data: scripts = [] } = useQuery<ScriptLibrary[]>({
-    queryKey: ["/api/phone-training/scripts"],
+    queryKey: queryString 
+      ? [`/api/phone-training/scripts?${queryString}`]
+      : ["/api/phone-training/scripts"]
   });
 
   const categories = [
-    { id: "all", label: "All Scripts", icon: "fas fa-list" },
-    { id: "opening", label: "Opening Scripts", icon: "fas fa-play" },
-    { id: "objection_response", label: "Objection Handling", icon: "fas fa-shield-alt" },
-    { id: "closing", label: "Closing Scripts", icon: "fas fa-handshake" },
-    { id: "storm_lead", label: "Storm Leads", icon: "fas fa-bolt" },
-    { id: "aged_roof", label: "Aged Roofs", icon: "fas fa-home" },
-    { id: "referral", label: "Referrals", icon: "fas fa-users" },
+    { id: "all", label: "All Scripts", icon: "fas fa-list", type: "category" },
+    { id: "opening", label: "Opening Scripts", icon: "fas fa-play", type: "category" },
+    { id: "objection_response", label: "Objection Handling", icon: "fas fa-shield-alt", type: "category" },
+    { id: "closing", label: "Closing Scripts", icon: "fas fa-handshake", type: "category" },
+    { id: "storm_lead", label: "Storm Leads", icon: "fas fa-bolt", type: "leadType" },
+    { id: "aged_roof", label: "Aged Roofs", icon: "fas fa-home", type: "leadType" },
+    { id: "referral", label: "Referrals", icon: "fas fa-users", type: "leadType" },
   ];
 
+  // Apply client-side search filtering to API results
   const filteredScripts = scripts.filter(script => {
-    const matchesSearch = script.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         script.scriptContent.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || 
-                           script.category === selectedCategory ||
-                           script.leadType === selectedCategory;
-    return matchesSearch && matchesCategory;
+    if (!searchTerm) return true;
+    return script.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           script.scriptContent.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   const popularScripts = [
@@ -97,18 +104,30 @@ Which would work better for you?`,
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              {categories.map(category => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.id)}
-                  data-testid={`filter-${category.id}`}
-                >
-                  <i className={`${category.icon} mr-1`}></i>
-                  {category.label}
-                </Button>
-              ))}
+              {categories.map(category => {
+                const isActive = category.type === "category" 
+                  ? selectedCategory === category.id
+                  : selectedLeadType === category.id;
+                  
+                return (
+                  <Button
+                    key={category.id}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      if (category.type === "category") {
+                        setSelectedCategory(category.id);
+                      } else {
+                        setSelectedLeadType(category.id);
+                      }
+                    }}
+                    data-testid={`filter-${category.id}`}
+                  >
+                    <i className={`${category.icon} mr-1`}></i>
+                    {category.label}
+                  </Button>
+                );
+              })}
             </div>
           </div>
         </CardContent>
