@@ -160,17 +160,6 @@ export default function Login() {
                 <strong>Note:</strong> If you're a new team member, please contact your admin to create your account.
               </p>
             </div>
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-700 font-medium mb-2">Demo Accounts:</p>
-              <p className="text-xs text-gray-600">
-                <strong>Super Admin:</strong> superadmin@roofingacademy.com<br />
-                Password: .1yzv3i84geiIR36P6
-              </p>
-              <p className="text-xs text-gray-600 mt-1">
-                <strong>Company Admin:</strong> admin@demo.com<br />
-                Password: 0.vlsuwgwsltDIJXMM
-              </p>
-            </div>
           </div>
         </div>
       </div>

@@ -26,6 +26,7 @@ export default function Admin() {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isSuperAdminPasswordDialogOpen, setIsSuperAdminPasswordDialogOpen] = useState(false);
 
   const { data: users = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
@@ -92,6 +93,15 @@ export default function Admin() {
     path: ["confirmPassword"],
   });
 
+  const superAdminPasswordSchema = z.object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+  }).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
   const editForm = useForm({
     resolver: zodResolver(editUserSchema),
     defaultValues: {
@@ -106,6 +116,15 @@ export default function Admin() {
   const passwordForm = useForm({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  const superAdminPasswordForm = useForm({
+    resolver: zodResolver(superAdminPasswordSchema),
+    defaultValues: {
+      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
@@ -164,6 +183,32 @@ export default function Admin() {
     },
   });
 
+  const superAdminChangePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string, newPassword: string }) => {
+      const response = await apiRequest("POST", "/api/users/change-password", data);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to change password");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password changed",
+        description: "Your password has been changed successfully.",
+      });
+      setIsSuperAdminPasswordDialogOpen(false);
+      superAdminPasswordForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error changing password",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleEditUser = (user: any) => {
     setEditingUser(user);
     editForm.reset({
@@ -194,7 +239,14 @@ export default function Admin() {
     }
   };
 
-  if (user?.role !== "admin") {
+  const onSuperAdminPasswordSubmit = (data: any) => {
+    superAdminChangePasswordMutation.mutate({
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+    });
+  };
+
+  if (user?.role !== "admin" && user?.role !== "super_admin") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card>
@@ -423,6 +475,50 @@ export default function Admin() {
           </CardContent>
         </Card>
 
+        {/* Super Admin Settings Card - Only visible to super admins */}
+        {user?.role === "super_admin" && (
+          <Card className="mt-8">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Super Admin Settings
+                  </CardTitle>
+                  <CardDescription>Manage super admin account settings</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsSuperAdminPasswordDialogOpen(true)}
+                  data-testid="button-change-super-admin-password"
+                >
+                  <Key className="mr-2 h-4 w-4" />
+                  Change Password
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-medium">Account Security</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Change your password to keep your account secure
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsSuperAdminPasswordDialogOpen(true)}
+                  >
+                    Change Password
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Edit User Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
@@ -581,6 +677,74 @@ export default function Admin() {
                   </Button>
                   <Button type="submit" disabled={changePasswordMutation.isPending}>
                     {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Super Admin Password Change Dialog */}
+        <Dialog open={isSuperAdminPasswordDialogOpen} onOpenChange={setIsSuperAdminPasswordDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Change Super Admin Password</DialogTitle>
+              <DialogDescription>
+                Change your super admin password for security purposes
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...superAdminPasswordForm}>
+              <form onSubmit={superAdminPasswordForm.handleSubmit(onSuperAdminPasswordSubmit)} className="space-y-4">
+                <FormField
+                  control={superAdminPasswordForm.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter current password" {...field} data-testid="input-current-password" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={superAdminPasswordForm.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter new password" {...field} data-testid="input-new-password" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={superAdminPasswordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Confirm new password" {...field} data-testid="input-confirm-password" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsSuperAdminPasswordDialogOpen(false)}
+                    data-testid="button-cancel-password-change"
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={superAdminChangePasswordMutation.isPending} data-testid="button-submit-password-change">
+                    {superAdminChangePasswordMutation.isPending ? "Changing..." : "Change Password"}
                   </Button>
                 </div>
               </form>

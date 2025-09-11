@@ -54,6 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
   // Profile routes
   app.get('/api/users/profile', authMiddleware, async (req: any, res) => {
     try {
