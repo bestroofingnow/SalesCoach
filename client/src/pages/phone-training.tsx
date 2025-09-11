@@ -61,7 +61,6 @@ export default function PhoneTraining() {
             consent-title="Terms and conditions"
             consent-content="By clicking &quot;Agree,&quot; and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as otherwise described in our Terms of Service."
             consent-storage-key="vapi_widget_consent"
-            style="display: none;"
           ></vapi-widget>
         `;
         document.body.appendChild(vapiWidget);

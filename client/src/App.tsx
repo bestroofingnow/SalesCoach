@@ -50,6 +50,7 @@ function Router() {
       <Route path="/profile" component={() => <ProtectedRoute component={Profile} />} />
       <Route path="/company-settings" component={() => <ProtectedRoute component={CompanySettings} />} />
       <Route path="/admin" component={() => <ProtectedRoute component={Admin} />} />
+      <Route path="/admin/company-settings" component={() => <ProtectedRoute component={CompanySettings} />} />
       <Route component={NotFound} />
     </Switch>
   );

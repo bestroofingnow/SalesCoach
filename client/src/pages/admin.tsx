@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Users, Shield, Home, ArrowLeft, Edit, Key, Trash2 } from "lucide-react";
+import { Plus, Users, Shield, Home, ArrowLeft, Edit, Key, Trash2, Settings } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Admin() {
@@ -219,17 +219,27 @@ export default function Admin() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <Shield className="h-8 w-8 text-primary" />
-            Admin Panel
-          </h1>
-          <p className="text-gray-600 mt-2">Manage users and system settings</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="mb-4">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                <Shield className="h-8 w-8 text-primary" />
+                Admin Panel
+              </h1>
+              <p className="text-gray-600 mt-2">Manage users and system settings</p>
+            </div>
+            <Link href="/company-settings">
+              <Button variant="outline" data-testid="button-company-settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Company Settings
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <Card>

@@ -120,10 +120,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCompany(id: string, companyData: Partial<Company>): Promise<Company | undefined> {
+    // Sanitize the input data to handle timestamp fields properly
+    const sanitizedData = { ...companyData };
+    
+    // Convert timestamp strings to Date objects or null
+    if (sanitizedData.billingStartDate !== undefined) {
+      if (typeof sanitizedData.billingStartDate === 'string') {
+        sanitizedData.billingStartDate = sanitizedData.billingStartDate ? new Date(sanitizedData.billingStartDate) : null;
+      }
+    }
+    
+    if (sanitizedData.nextBillingDate !== undefined) {
+      if (typeof sanitizedData.nextBillingDate === 'string') {
+        sanitizedData.nextBillingDate = sanitizedData.nextBillingDate ? new Date(sanitizedData.nextBillingDate) : null;
+      }
+    }
+    
+    // Remove fields that shouldn't be updated directly
+    delete sanitizedData.id;
+    delete sanitizedData.createdAt;
+    delete sanitizedData.updatedAt;
+    
     const [company] = await db
       .update(companies)
       .set({
-        ...companyData,
+        ...sanitizedData,
         updatedAt: sql`NOW()`
       })
       .where(eq(companies.id, id))

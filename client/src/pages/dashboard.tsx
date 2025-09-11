@@ -33,7 +33,7 @@ export default function Dashboard() {
     retry: false,
   });
 
-  const { data: tracks } = useQuery({
+  const { data: tracks } = useQuery<Array<{id: string; name: string}>>({ 
     queryKey: ["/api/tracks"],
     retry: false,
   });
@@ -195,7 +195,12 @@ export default function Dashboard() {
 
                   <Button 
                     className="w-full bg-blue-500 hover:bg-blue-600"
-                    onClick={() => setLocation("/tracks/residential-roofing")}
+                    onClick={() => {
+                      const residentialTrack = tracks?.find(track => track.name === 'Residential Roofing');
+                      if (residentialTrack) {
+                        setLocation(`/tracks/${residentialTrack.id}`);
+                      }
+                    }}
                   >
                     Continue Learning
                   </Button>
@@ -237,7 +242,12 @@ export default function Dashboard() {
 
                   <Button 
                     className="w-full bg-orange-500 hover:bg-orange-600"
-                    onClick={() => setLocation("/tracks/commercial-roofing")}
+                    onClick={() => {
+                      const commercialTrack = tracks?.find(track => track.name === 'Commercial Roofing');
+                      if (commercialTrack) {
+                        setLocation(`/tracks/${commercialTrack.id}`);
+                      }
+                    }}
                   >
                     Continue Learning
                   </Button>
@@ -279,7 +289,12 @@ export default function Dashboard() {
 
                   <Button 
                     className="w-full bg-purple-500 hover:bg-purple-600"
-                    onClick={() => setLocation("/tracks/restoration-insurance")}
+                    onClick={() => {
+                      const restorationTrack = tracks?.find(track => track.name === 'Restoration & Insurance');
+                      if (restorationTrack) {
+                        setLocation(`/tracks/${restorationTrack.id}`);
+                      }
+                    }}
                   >
                     Continue Learning
                   </Button>

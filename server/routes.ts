@@ -431,9 +431,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
+      // Determine noteType based on context
+      let noteType = 'general';
+      if (req.body.lessonId) {
+        noteType = 'lesson';
+      } else if (req.body.moduleId) {
+        noteType = 'module';
+      } else if (req.body.trackId) {
+        noteType = 'track';
+      }
+      
       const noteData = {
         ...req.body,
-        userId
+        userId,
+        noteType
       };
       
       const note = await storage.createUserNote(noteData);
