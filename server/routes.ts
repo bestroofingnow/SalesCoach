@@ -286,6 +286,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // VAPI Role-Play Training Routes
+  app.get('/api/vapi/config', authMiddleware, async (_req: any, res) => {
+    try {
+      const assistantId = process.env.VAPI_ASSISTANT_ID || 'd2794e4d-af9a-4fe3-8f56-2ebd781d2c6a';
+      const publicKey = process.env.VAPI_PUBLIC_KEY || 'c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2';
+      res.json({ assistantId, publicKey });
+    } catch (error) {
+      console.error('Error fetching VAPI config:', error);
+      res.status(500).json({ message: 'Failed to fetch VAPI config' });
+    }
+  });
   app.get('/api/vapi/agent', authMiddleware, async (req: any, res) => {
     try {
       const companyId = req.user?.companyId;
@@ -364,8 +374,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         message: "Web call started successfully",
         call: callResult,
-        assistantId: agent.vapiAssistantId || 'd2794e4d-af9a-4fe3-8f56-2ebd781d2c6a',
-        publicKey: 'c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2' // Public key for widget integration
+        assistantId: agent.vapiAssistantId || (process.env.VAPI_ASSISTANT_ID || 'd2794e4d-af9a-4fe3-8f56-2ebd781d2c6a'),
+        publicKey: process.env.VAPI_PUBLIC_KEY || 'c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2'
       });
       
     } catch (error) {

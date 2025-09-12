@@ -36,34 +36,43 @@ export default function PhoneTraining() {
     const addVapiWidget = () => {
       const vapiWidgetExists = document.querySelector('vapi-widget');
       if (!vapiWidgetExists) {
-        const vapiWidget = document.createElement('div');
-        vapiWidget.innerHTML = `
-          <vapi-widget
-            public-key="c4cdfc01-71c2-49e7-b13c-c8ba6e109ce2"
-            assistant-id="d2794e4d-af9a-4fe3-8f56-2ebd781d2c6a"
-            mode="voice"
-            theme="dark"
-            base-bg-color="#000000"
-            accent-color="#14B8A6"
-            cta-button-color="#000000"
-            cta-button-text-color="#ffffff"
-            border-radius="large"
-            size="full"
-            position="bottom-right"
-            title="TALK WITH AI"
-            start-button-text="Start"
-            end-button-text="End Call"
-            cta-title="PRACTICE CALLS"
-            chat-first-message="Hey, How can I help you today?"
-            chat-placeholder="Type your message..."
-            voice-show-transcript="true"
-            consent-required="true"
-            consent-title="Terms and conditions"
-            consent-content="By clicking &quot;Agree,&quot; and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as otherwise described in our Terms of Service."
-            consent-storage-key="vapi_widget_consent"
-          ></vapi-widget>
-        `;
-        document.body.appendChild(vapiWidget);
+        fetch('/api/vapi/config', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+          }
+        })
+          .then((res) => res.json())
+          .then((config) => {
+            const vapiWidget = document.createElement('div');
+            vapiWidget.innerHTML = `
+              <vapi-widget
+                public-key="${config.publicKey}"
+                assistant-id="${config.assistantId}"
+                mode="voice"
+                theme="dark"
+                base-bg-color="#000000"
+                accent-color="#14B8A6"
+                cta-button-color="#000000"
+                cta-button-text-color="#ffffff"
+                border-radius="large"
+                size="full"
+                position="bottom-right"
+                title="TALK WITH AI"
+                start-button-text="Start"
+                end-button-text="End Call"
+                cta-title="PRACTICE CALLS"
+                chat-first-message="Hey, How can I help you today?"
+                chat-placeholder="Type your message..."
+                voice-show-transcript="true"
+                consent-required="true"
+                consent-title="Terms and conditions"
+                consent-content="By clicking &quot;Agree,&quot; and each time I interact with this AI agent, I consent to the recording, storage, and sharing of my communications with third-party service providers, and as otherwise described in our Terms of Service."
+                consent-storage-key="vapi_widget_consent"
+              ></vapi-widget>
+            `;
+            document.body.appendChild(vapiWidget);
+          })
+          .catch((err) => console.error('Failed to load VAPI config', err));
       }
     };
     
