@@ -88,8 +88,8 @@ interface VapiConfig {
   model?: string;
 }
 
-// VAPI Door to Door Training Assistant ID (provided by user)
-const DOOR_TO_DOOR_ASSISTANT_ID = 'd2794e4d-af9a-4fe3-8f56-2ebd781d2c6a';
+// VAPI Door to Door Training Assistant ID
+const DOOR_TO_DOOR_ASSISTANT_ID = process.env.VAPI_ASSISTANT_ID || 'd2794e4d-af9a-4fe3-8f56-2ebd781d2c6a';
 
 export class VapiService {
   private baseUrl = 'https://api.vapi.ai/v1';
@@ -244,7 +244,7 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          assistantId: DOOR_TO_DOOR_ASSISTANT_ID, // Use the hardcoded assistant ID for Door to Door Training
+          assistantId: DOOR_TO_DOOR_ASSISTANT_ID,
           customer: {
             number: phoneNumber
           }
@@ -287,7 +287,7 @@ ${(company.trainingAreas as string[])?.map(t => `- ${t}`).join('\n') || '- Sales
         },
         body: JSON.stringify({
           type: 'webCall', // Specify web call type
-          assistantId: agent.vapiAssistantId || DOOR_TO_DOOR_ASSISTANT_ID, // Use stored assistant ID or fallback
+          assistantId: agent.vapiAssistantId || DOOR_TO_DOOR_ASSISTANT_ID,
           metadata: {
             userId: userId,
             trainingSession: true,
