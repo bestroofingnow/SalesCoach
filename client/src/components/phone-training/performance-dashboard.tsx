@@ -37,13 +37,14 @@ export default function PerformanceDashboard() {
     queryKey: ["/api/phone-training/recordings/recent"],
   });
 
-  const currentStats = performanceData?.weekly?.[0] || {
-    totalDials: 0,
-    totalContacts: 0,
-    appointmentsSet: 0,
-    contactRate: 0,
-    appointmentRate: 0,
-    averageCallScore: 0
+  const rawStats = performanceData?.weekly?.[0];
+  const currentStats = {
+    totalDials: rawStats?.totalDials ?? 0,
+    totalContacts: rawStats?.totalContacts ?? 0,
+    appointmentsSet: rawStats?.appointmentsSet ?? 0,
+    contactRate: rawStats?.contactRate ?? 0,
+    appointmentRate: rawStats?.appointmentRate ?? 0,
+    averageCallScore: rawStats?.averageCallScore ?? 0
   };
 
   const trends = performanceData?.trends || {

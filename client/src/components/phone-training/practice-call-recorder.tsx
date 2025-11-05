@@ -434,7 +434,7 @@ export default function PracticeCallRecorder() {
                     </div>
                   </div>
                   <Badge variant="secondary">
-                    {new Date(recording.createdAt).toLocaleDateString()}
+                    {recording.createdAt ? new Date(recording.createdAt).toLocaleDateString() : 'N/A'}
                   </Badge>
                 </div>
               ))}

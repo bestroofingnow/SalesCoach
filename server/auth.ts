@@ -3,7 +3,16 @@ import jwt from 'jsonwebtoken';
 import { User, LoginData } from '@shared/schema';
 import { storage } from './storage';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-replace-in-production';
+// Validate that JWT_SECRET is set - fail fast if not configured
+if (!process.env.JWT_SECRET) {
+  throw new Error(
+    'CRITICAL: JWT_SECRET environment variable is not set. ' +
+    'Please set JWT_SECRET in your .env file. ' +
+    'Generate a secure key using: openssl rand -hex 32'
+  );
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function hashPassword(password: string): Promise<string> {
   return await bcrypt.hash(password, 10);
